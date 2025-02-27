@@ -1,0 +1,54 @@
+/* General Page Styling */
+body {
+    background-color: #ffffff; /* Light gray background */
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+/* Custom Navbar Styling */
+.navbar {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Styling the Table */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #343a40; /* Dark background for headers */
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #e9ecef; /* Light gray for alternate rows */
+}
+
+tr:hover {
+    background-color: #dee2e6; /* Slightly darker gray on hover */
+}
+
+/* Centering Text in Blank Page */
+.blank-page-container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.team-img {
+    width: 250px; /* Set a fixed width */
+    height: 300px; /* Set a fixed height */
+    object-fit: cover; /* Ensures images are cropped to fit while maintaining aspect ratio */
+    border-radius: 10px; /* Optional: rounded corners */
+    box-shadow: 0px 10px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
+}
+
+.about-text {
+    margin-inline: 300px;
+    text-align: center;
+}
