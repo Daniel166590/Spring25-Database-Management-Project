@@ -72,15 +72,7 @@ The system uses a MySQL relational database with the following tables:
 2. Create playlists and like songs (Normal User).
 3. Add artist information and upload songs (Artist User).
 
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request with your changes.
-
 ## License
 
 This project is licensed under the MIT License.
-
-## Contact
-
-For questions or suggestions, feel free to reach out to [Your Name] at [Your Email].
 
