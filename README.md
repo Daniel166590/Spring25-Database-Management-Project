@@ -23,6 +23,59 @@ Welcome to the **Music Database System**! This project is a web-based platform d
 - Song search and filtering.
 - Artist biography management.
 
+### File Structure Overview
+   ```bash
+Spring25-Database-Management-Project/
+│── backend/                 # Django backend
+│   ├── manage.py            # Django project management script
+│   ├── requirements.txt     # Dependencies
+│   ├── db.sqlite3           # Default database (or PostgreSQL/MySQL in production)
+│   ├── backend/             # Main Django app
+│   │   ├── __init__.py
+│   │   ├── settings.py      # Django settings (configure for React & CORS)
+│   │   ├── urls.py          # API endpoints
+│   │   ├── views.py         # API logic
+│   │   ├── models.py        # Database models
+│   │   ├── serializers.py   # Convert DB models to JSON
+│   │   ├── admin.py         # Admin panel setup
+│   │   ├── tests.py         # Unit tests
+│   │   └── migrations/      # Database migrations
+│   ├── api/                 # Django Rest Framework (DRF) API
+│   │   ├── __init__.py
+│   │   ├── urls.py
+│   │   ├── views.py
+│   │   ├── serializers.py
+│   │   ├── permissions.py
+│   │   ├── authentication.py
+│   │   └── tests.py
+│   ├── static/              # Static files (if needed)
+│   ├── templates/           # Templates (if using Django for pages)
+│   └── media/               # Uploaded media files
+│
+│── frontend/                # React frontend
+│   ├── public/              # Public assets
+│   ├── src/                 # Source files
+│   │   ├── components/      # Reusable components
+│   │   ├── pages/           # Page views
+│   │   ├── services/        # API calls to Django backend
+│   │   ├── App.js           # Main React app component
+│   │   ├── index.js         # React root
+│   │   ├── styles/          # Styling (CSS, SCSS, Tailwind)
+│   ├── package.json         # Frontend dependencies
+│   ├── .env                 # Environment variables (API URLs, etc.)
+│   ├── vite.config.js       # (If using Vite instead of CRA)
+│   ├── webpack.config.js    # (If using Webpack)
+│   ├── tailwind.config.js   # (If using Tailwind CSS)
+│   └── node_modules/        # Dependencies
+│
+│── .gitignore               # Ignore unnecessary files
+│── README.md                # Documentation
+│── docker-compose.yml       # Optional: Containerized setup
+│── .env                     # Environment variables for backend/frontend
+│── scripts/                 # Deployment/management scripts
+└── docs/                    # Documentation
+   ```
+
 ## Database Schema
 
 The system uses a MySQL relational database with the following tables:
