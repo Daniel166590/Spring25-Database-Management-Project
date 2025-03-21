@@ -1,0 +1,1 @@
+# Django project management script
