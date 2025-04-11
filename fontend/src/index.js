@@ -1,1 +1,0 @@
-// Styling (CSS, SCSS, TailwindCSS, etc.)
