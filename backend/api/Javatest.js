@@ -91,7 +91,7 @@ const song_list = await GetTracks(album_id);
 this_artist = new Artist(artistarray[i],i+1, id, song_list);
 ArrayofArtistinfo.push(this_artist);
 }
-console.log(ArrayofArtistinfo.length)
+//console.log(ArrayofArtistinfo[1].tracks);
 }
 
 main();
