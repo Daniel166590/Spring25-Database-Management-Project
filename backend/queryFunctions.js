@@ -65,26 +65,65 @@ async function addSongToPlaylist(playlistId, songId) {
     }
   }
   
-  //Remove a song from a user's playlist
-  async function removeSongFromPlaylist(playlistId, songId) {
-    const connection = await pool.getConnection();
-    try {
-      const [result] = await connection.execute(
-        `DELETE FROM PLAYLIST_SONGS WHERE PlaylistID = ? AND SongID = ?`,
-        [playlistId, songId]
-      );
-  
-      if (result.affectedRows === 0) {
-        console.log('Song not found in playlist.');
-      } else {
-        console.log(`Song ${songId} removed from playlist ${playlistId}`);
-      }
-    } catch (err) {
-      console.error('Error removing song:', err);
-    } finally {
-      connection.release();
+//Remove a song from a user's playlist
+async function removeSongFromPlaylist(playlistId, songId) {
+  const connection = await pool.getConnection();
+  try {
+    const [result] = await connection.execute(
+      `DELETE FROM PLAYLIST_SONGS WHERE PlaylistID = ? AND SongID = ?`,
+      [playlistId, songId]
+    );
+
+    if (result.affectedRows === 0) {
+      console.log('Song not found in playlist.');
+    } else {
+      console.log(`Song ${songId} removed from playlist ${playlistId}`);
     }
+  } catch (err) {
+    console.error('Error removing song:', err);
+  } finally {
+    connection.release();
   }
+}
+
+//function that returns all of the song ids in a certain genre. 
+async function getSongsByGenre(genre) {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `SELECT SongID FROM SONG WHERE Genre = ?`,
+      [genre]
+    );
+
+    return rows.map(row => row.SongID); //returns song ids
+  } catch (err) {
+    console.error('Error retrieving songs by genre:', err);
+    return [];
+  } finally {
+    connection.release();
+  }
+}
+
+//function to return all of the song ids of songs made by a certain artist. 
+async function getSongsByArtistName(artistName) {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `SELECT SONG.SongID, SONG.Name AS SongName
+       FROM SONG
+       JOIN ARTIST ON SONG.ArtistID = ARTIST.ArtistID
+       WHERE ARTIST.Name = ?`,
+      [artistName]
+    );
+
+    return rows.map(row => row.SongID); //returns song ids
+  } catch (err) {
+    console.error('Error retrieving songs by artist name:', err);
+    return [];
+  } finally {
+    connection.release();
+  }
+}
 
 
 
