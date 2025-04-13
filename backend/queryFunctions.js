@@ -1,5 +1,7 @@
 const mysql = require('mysql2/promise');
 
+const pool = require('./db');
+/*
 // Database connection setup
 const pool = mysql.createPool({
   host: 'localhost',
@@ -10,7 +12,7 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
-
+*/
 // Function to get playlists and their song IDs for a given user
 async function getUserPlaylistSongs(userId) {
   const connection = await pool.getConnection();
@@ -125,7 +127,60 @@ async function getSongsByArtistName(artistName) {
   }
 }
 
+// Fetch albums along with artist names and their songs
+async function getAlbumsWithSongs(limit = 100, offset = 0) {
+  const sqlAlbums = `
+    SELECT 
+      ARTIST_ALBUM.AlbumID,
+      ARTIST_ALBUM.Title AS AlbumTitle,
+      ARTIST.Name AS ArtistName,
+      ARTIST_ALBUM.DateAdded
+    FROM ARTIST_ALBUM
+    JOIN ARTIST ON ARTIST.ArtistID = ARTIST_ALBUM.ArtistID
+    ORDER BY ARTIST_ALBUM.DateAdded DESC
+    LIMIT ? OFFSET ?;
+  `;
 
+  try {
+    const [albums] = await pool.query(sqlAlbums, [limit, offset]);
+
+    if (albums.length === 0) return [];
+
+    const albumIds = albums.map(album => album.AlbumID);
+
+    const sqlSongs = `
+      SELECT SongID, AlbumID, Name, Genre
+      FROM SONG
+      WHERE AlbumID IN (?);
+    `;
+
+    const [songs] = await pool.query(sqlSongs, [albumIds]);
+
+    const albumMap = {};
+    albums.forEach(album => {
+      albumMap[album.AlbumID] = {
+        AlbumID: album.AlbumID,
+        Title: album.AlbumTitle,
+        ArtistName: album.ArtistName,
+        DateAdded: album.DateAdded,
+        Songs: [],
+      };
+    });
+
+    songs.forEach(song => {
+      if (albumMap[song.AlbumID]) {
+        albumMap[song.AlbumID].Songs.push(song);
+      }
+    });
+
+    return Object.values(albumMap);
+  } catch (error) {
+    console.error("Database query error:", error);
+    throw error;
+  }
+}
+
+module.exports = { getAlbumsWithSongs };
 
 // Example usage
 (async () => {

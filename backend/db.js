@@ -1,19 +1,24 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
-const db = mysql.createConnection({
+const pool = mysql.createPool({
   host: '127.0.0.1',
-  user: 'root',
-  password: '',
-  database: 'CSCI4560_HW3',
   port: 3307,
+  user: 'root',
+  password: '', // Adjust if your MySQL password isn't empty
+  database: 'Spring25_Database_Management_Project',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error('MySQL connection failed:', err);
-  } else {
-    console.log('MySQL connected.');
+// Test connection by running a simple query
+(async () => {
+  try {
+    const [rows] = await pool.query('SELECT 1');
+    console.log('✅ MySQL connection successful!');
+  } catch (err) {
+    console.error('❌ MySQL connection failed:', err);
   }
-});
+})();
 
-module.exports = db;
+module.exports = pool;
