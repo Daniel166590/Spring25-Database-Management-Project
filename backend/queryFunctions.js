@@ -183,8 +183,8 @@ async function getAlbumsWithSongs(limit = 100, offset = 0) {
 module.exports = { getAlbumsWithSongs };
 
 // Example usage
-(async () => {
+/*(async () => {
   const userId = 1; // replace with the actual user ID you want to query
   const playlists = await getUserPlaylistSongs(userId);
   console.log(JSON.stringify(playlists, null, 2));
-})();
+})();*/
