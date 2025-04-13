@@ -11,7 +11,7 @@ const AlbumsTable = () => {
   const [expandedAlbum, setExpandedAlbum] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/albums?limit=100&offset=0')
+    axios.get('http://localhost:3005/api/albums?limit=100&offset=0')
       .then(response => setAlbums(response.data))
       .catch(err => console.error('Error fetching albums:', err));
   }, []);
