@@ -29,15 +29,6 @@ frontend/dist/
 .DS_Store
 Thumbs.db
 
-# Static/media files (you can be selective)
-**/media/*
-**/static/*
-!**/static/.keep  # Optional: keep the folder
-
-# Image assets - keep only if necessary
-frontend/src/assets/images/
-!frontend/src/assets/images/logo-ct.png   # example of something to keep
-
 # Compiled JS/CSS maps
 *.map
 
