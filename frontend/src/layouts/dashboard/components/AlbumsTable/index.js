@@ -1,14 +1,11 @@
 // layouts/dashboard/components/AlbumsTable/index.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
-// Material-UI components
 import {
   Table,
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
   Collapse,
   IconButton,
@@ -18,44 +15,79 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-function AlbumRow({ album, isExpanded, toggleExpand }) {
+// Row component: renders header row if isHeader is true, else a normal album row with expandable content.
+function AlbumRow({ album, isExpanded, toggleExpand, isHeader }) {
   return (
     <>
-      {/* Main row: narrow first cell with arrow icon */}
-      <TableRow hover onClick={toggleExpand} sx={{ cursor: "pointer" }}>
-        <TableCell sx={{ textAlign: "center", p: 0 }}>
-          <IconButton size="small">
-            {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
+      <TableRow
+        hover={!isHeader}
+        onClick={!isHeader ? toggleExpand : undefined}
+        sx={{ cursor: !isHeader ? "pointer" : "default" }}
+      >
+        <TableCell sx={{ textAlign: "center", p: 0, width: "50px" }}>
+          {isHeader ? (
+            // Render an empty cell for the header (could also put a symbol if desired)
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>&nbsp;</Typography>
+          ) : (
+            <IconButton size="small">
+              {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
+          )}
         </TableCell>
-        <TableCell>{album.Title}</TableCell>
-        <TableCell>{album.ArtistName}</TableCell>
-        <TableCell>{new Date(album.DateAdded).toLocaleDateString()}</TableCell>
+        <TableCell>
+          {isHeader ? (
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Album Title
+            </Typography>
+          ) : (
+            album.Title
+          )}
+        </TableCell>
+        <TableCell>
+          {isHeader ? (
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Artist
+            </Typography>
+          ) : (
+            album.ArtistName
+          )}
+        </TableCell>
+        <TableCell sx={{ width: "160px" }}>
+          {isHeader ? (
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Date Added
+            </Typography>
+          ) : (
+            new Date(album.DateAdded).toLocaleDateString()
+          )}
+        </TableCell>
       </TableRow>
 
-      {/* Expanded row for songs */}
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
-          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-            <Box m={2}>
-              <Typography variant="h6" gutterBottom>
-                Songs in {album.Title}
-              </Typography>
-              {album.Songs?.length ? (
-                album.Songs.map((song) => (
-                  <Typography key={song.SongID} variant="body2">
-                    🎵 {song.Name} – <i>{song.Genre}</i>
-                  </Typography>
-                ))
-              ) : (
-                <Typography variant="body2" color="textSecondary">
-                  No songs available.
+      {/* Expanded row for songs: only for non-header rows */}
+      {!isHeader && (
+        <TableRow>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+            <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+              <Box margin={2}>
+                <Typography variant="h6" gutterBottom>
+                  Songs in {album.Title}
                 </Typography>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
+                {album.Songs && album.Songs.length > 0 ? (
+                  album.Songs.map((song) => (
+                    <Typography key={song.SongID} variant="body2">
+                      🎵 {song.Name} – <i>{song.Genre}</i>
+                    </Typography>
+                  ))
+                ) : (
+                  <Typography variant="body2" color="textSecondary">
+                    No songs available.
+                  </Typography>
+                )}
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      )}
     </>
   );
 }
@@ -72,39 +104,26 @@ export default function AlbumsTable() {
   }, []);
 
   const handleRowClick = (albumId) => {
-    setExpandedAlbum((prev) => (prev === albumId ? null : albumId));
+    setExpandedAlbum(expandedAlbum === albumId ? null : albumId);
   };
 
   return (
     <TableContainer>
-      {/* Fix table layout & define column widths */}
       <Table
         sx={{
           width: "100%",
-          tableLayout: "fixed", // Ensures columns keep assigned widths
+          tableLayout: "fixed",
         }}
       >
         <colgroup>
-          {/* Arrow column: 50px */}
           <col style={{ width: "50px" }} />
-          {/* Let the next 2 columns auto-size */}
           <col />
           <col />
-          {/* Date column might be narrower or also auto */}
           <col style={{ width: "160px" }} />
         </colgroup>
-
-        <TableHead>
-          <TableRow>
-            {/* Empty header for the arrow column */}
-            <TableCell sx={{ textAlign: "center", p: 0 }} />
-            <TableCell>Album Title</TableCell>
-            <TableCell>Artist</TableCell>
-            <TableCell>Date Added</TableCell>
-          </TableRow>
-        </TableHead>
-
         <TableBody>
+          {/* Render the header row as a normal row with isHeader set */}
+          <AlbumRow isHeader={true} />
           {albums.map((album) => (
             <AlbumRow
               key={album.AlbumID}
