@@ -76,7 +76,7 @@ async function searchAlbums(artistId) {
       return [];
     }
     
-    const albums_list = result.body.items.map(album => new Album(album.name, album.id, album.release_date));
+    const albums_list = result.body.items.map(album => new Album(album.name, album.id, album.images[0].url, album.release_date));
     return albums_list;
   } catch (error) {
     if (error.statusCode === 429) {
