@@ -1,13 +1,13 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const mysql = require('mysql2');
-
+require('dotenv').config();
 // Create a connection to the database
 const connection = mysql.createConnection({
   host: 'localhost', // Update this with your database host
   user: 'root', // Your MySQL username
-  password: '', // Your MySQL password
-  database: 'Spring25_Database_Management_Project', // Your database name
-  port: 3307 // Your MySQL port, default is usually 3306
+  password: 'Prospero11@1', // Your MySQL password
+  database: 'for_project' //'Spring25_Database_Management_Project', // Your database name
+  //port: 3307 // Your MySQL port, default is usually 3306
 });
 const spotifyApi = new SpotifyWebApi({
   clientId: '2d04cb15fa944b838588a89c9f961026',
@@ -50,6 +50,38 @@ class submit{
     this.list = list_of_artists
   }
 }
+const axios = require('axios');
+
+// Get the YouTube video link
+// No dotenv neede
+
+const YOUTUBE_API_KEY = 'AIzaSyD5ulpAI-5W7PM3gstgva5n2s_krwg0PMg'; // <- hardcoded
+
+async function getYouTubeLink(songName, artistName) {
+  try {
+    const query = `${songName} ${artistName} official audio`;
+
+    const res = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+      params: {
+        part: 'snippet',
+        q: query,
+        key: YOUTUBE_API_KEY,
+        maxResults: 1,
+        type: 'video'
+      }
+    });
+
+    const video = res.data.items[0];
+    if (!video) return null;
+
+    return `https://www.youtube.com/watch?v=${video.id.videoId}`;
+  } catch (err) {
+    console.error('Error fetching YouTube link:', err.response?.data || err);
+    return null;
+  }
+}
+
+
 async function searchArtist(artistName) {
   try {
     const data = await spotifyApi.clientCredentialsGrant();
@@ -196,11 +228,11 @@ async function insertAlbum(artistId, name, images, year) {
 }
 
 
-async function insertSong(artistid, albumId, name, genre, year) {
+async function insertSong(artistid, albumId, name, genre, year, ytlink) {
   return new Promise((resolve, reject) => {
-    const insertQuery = 'INSERT INTO song (ArtistId, AlbumId, name, genre, datecreated) VALUES (?, ?, ?, ?, ?)';
+    const insertQuery = 'INSERT INTO song (ArtistId, AlbumId, name, genre, datecreated, YouTubeLink) VALUES (?, ?, ?, ?, ?, ?)';
     
-    connection.query(insertQuery, [artistid, albumId, name, genre, year], (err, result) => {
+    connection.query(insertQuery, [artistid, albumId, name, genre, year, ytlink], (err, result) => {
       if (err) {
         if (err.code === 'ER_DUP_ENTRY') {
           const selectQuery = 'SELECT SongId FROM song WHERE AlbumId = ? AND name = ?';
@@ -224,57 +256,65 @@ async function insertSong(artistid, albumId, name, genre, year) {
 }
 
 
+
 async function getAllArtistInfo() {
   const artistarray = [
     'Powerwolf', 'Tyler the Creator', 'Kristofer Maddigan', 'Queen', 
     'jmbeatz', 'TRASHBABYDISTRO', 'Frank Sinatra'
   ];
 
+  const fullArtistData = [];
+
   for (let i = 0; i < artistarray.length; i++) {
-    // Get the artist ID and genre from Spotify (make sure searchArtist returns valid data)
-    const artistResult = await searchArtist(artistarray[i]);
+    const artistName = artistarray[i];
+    const artistResult = await searchArtist(artistName);
     if (!artistResult) {
-      console.error(`No artist data returned for ${artistarray[i]}`);
+      console.error(`No artist data returned for ${artistName}`);
       continue;
     }
     const { id, genre } = artistResult;
-
-    // Now get the albums for this artist
     const album_info = await searchAlbums(id);
-    if (!album_info || !Array.isArray(album_info) || album_info.length === 0) {
-      console.error(`No album info returned for artist ${artistarray[i]}`);
+    if (!album_info || album_info.length === 0) {
+      console.error(`No album info returned for artist ${artistName}`);
       continue;
     }
-    
-    // Safely map album IDs
     const album_ids = album_info.map(a => a.AlbumID);
-    // Get tracks for these albums
     const song_list = await GetTracks(album_ids);
-    
-    try {
-      // Insert artist data into your DB
-      const artistId = await insertArtist(artistarray[i], genre);
-      console.log(`Inserted artist: ${artistarray[i]} with ID: ${artistId}`);
 
-      // Insert album and song data
+    try {
+      const artistId = await insertArtist(artistName, genre);
+      console.log(`Inserted artist: ${artistName} with ID: ${artistId}`);
+      const albumsForArtist = [];
+
       for (const album of album_info) {
-        console.log(album.Title)
         const albumId = await insertAlbum(artistId, album.Title, album.AlbumArt, album.year);
         console.log(`Inserted album: ${album.Title} with ID: ${albumId}`);
+        const songsForAlbum = [];
 
-        // Insert songs that belong to this album
         for (const song of song_list) {
           if (song.album === album.Title) {
-            await insertSong(artistId, albumId, song.name, genre, song.year);
-            console.log(`Inserted song: ${song.name}`);
+            const ytlink = await getYouTubeLink(song.name, artistName);
+            await insertSong(artistId, albumId, song.name, genre, song.year, ytlink);
+            songsForAlbum.push(new Songs(song.name, song.album, song.year));
           }
         }
+
+        const albumObj = new Album(album.Title, albumId, album.year, album.AlbumArt);
+        albumObj.songs = songsForAlbum;
+        albumsForArtist.push(albumObj);
       }
+
+      const artistObj = new Artist(artistName, artistId, id, genre, albumsForArtist, song_list);
+      fullArtistData.push(artistObj);
+
       console.log(`${i + 1} is Done`);
     } catch (error) {
       console.error("Error inserting data:", error);
     }
   }
+
+  return new submit(fullArtistData); // Submit wraps the artist list
 }
+
 
 module.exports = { getAllArtistInfo };
