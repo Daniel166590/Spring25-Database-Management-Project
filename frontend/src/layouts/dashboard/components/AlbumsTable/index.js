@@ -1,68 +1,120 @@
 // layouts/dashboard/components/AlbumsTable/index.js
-import React, { useState, useEffect } from 'react';
-import DataTable from 'examples/Tables/DataTable';
-import MDBox from 'components/MDBox';
-import MDTypography from 'components/MDTypography';
-import MDButton from 'components/MDButton';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const AlbumsTable = () => {
+// Material-UI components
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Collapse,
+  IconButton,
+  Box,
+  Typography,
+} from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+
+function AlbumRow({ album, isExpanded, toggleExpand }) {
+  return (
+    <>
+      {/* Main row: narrow first cell with arrow icon */}
+      <TableRow hover onClick={toggleExpand} sx={{ cursor: "pointer" }}>
+        <TableCell sx={{ textAlign: "center", p: 0 }}>
+          <IconButton size="small">
+            {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell>{album.Title}</TableCell>
+        <TableCell>{album.ArtistName}</TableCell>
+        <TableCell>{new Date(album.DateAdded).toLocaleDateString()}</TableCell>
+      </TableRow>
+
+      {/* Expanded row for songs */}
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+            <Box m={2}>
+              <Typography variant="h6" gutterBottom>
+                Songs in {album.Title}
+              </Typography>
+              {album.Songs?.length ? (
+                album.Songs.map((song) => (
+                  <Typography key={song.SongID} variant="body2">
+                    🎵 {song.Name} – <i>{song.Genre}</i>
+                  </Typography>
+                ))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No songs available.
+                </Typography>
+              )}
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
+  );
+}
+
+export default function AlbumsTable() {
   const [albums, setAlbums] = useState([]);
   const [expandedAlbum, setExpandedAlbum] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:3005/api/albums?limit=100&offset=0')
-      .then(response => setAlbums(response.data))
-      .catch(err => console.error('Error fetching albums:', err));
+    axios
+      .get("http://localhost:3005/api/albums?limit=100&offset=0")
+      .then((response) => setAlbums(response.data))
+      .catch((err) => console.error("Error fetching albums:", err));
   }, []);
 
-  const columns = [
-    { Header: 'Album Title', accessor: 'Title' },
-    { Header: 'Artist', accessor: 'ArtistName' },
-    { Header: 'Date Added', accessor: 'DateAdded' },
-    { Header: 'Action', accessor: 'Action', width: '15%', align: 'center' },
-  ];
-
-  const rows = albums.map((album) => ({
-    Title: (
-      <MDTypography variant="caption" fontWeight="medium">
-        {album.Title}
-      </MDTypography>
-    ),
-    ArtistName: (
-      <MDTypography variant="caption" color="text">
-        {album.ArtistName}
-      </MDTypography>
-    ),
-    DateAdded: new Date(album.DateAdded).toLocaleDateString(),
-    Action: (
-      <MDButton variant="outlined" size="small" onClick={() => setExpandedAlbum(expandedAlbum === album.AlbumID ? null : album.AlbumID)}>
-        {expandedAlbum === album.AlbumID ? 'Hide Songs' : 'Show Songs'}
-      </MDButton>
-    ),
-    Songs: album.Songs,
-    AlbumID: album.AlbumID,
-  }));
+  const handleRowClick = (albumId) => {
+    setExpandedAlbum((prev) => (prev === albumId ? null : albumId));
+  };
 
   return (
-    <MDBox p={3}>
-      <DataTable
-        table={{ columns, rows }}
-        entriesPerPage={false}
-        showTotalEntries={false}
-      />
-      {expandedAlbum && (
-        <MDBox mt={2} p={2} borderRadius="lg" bgColor="grey-100">
-          <MDTypography variant="h6" mb={1}>Songs in Album</MDTypography>
-          {albums.find(a => a.AlbumID === expandedAlbum)?.Songs.map(song => (
-            <MDTypography key={song.SongID} variant="body2">
-              🎵 {song.Name} - <i>{song.Genre}</i>
-            </MDTypography>
-          ))}
-        </MDBox>
-      )}
-    </MDBox>
-  );
-};
+    <TableContainer>
+      {/* Fix table layout & define column widths */}
+      <Table
+        sx={{
+          width: "100%",
+          tableLayout: "fixed", // Ensures columns keep assigned widths
+        }}
+      >
+        <colgroup>
+          {/* Arrow column: 50px */}
+          <col style={{ width: "50px" }} />
+          {/* Let the next 2 columns auto-size */}
+          <col />
+          <col />
+          {/* Date column might be narrower or also auto */}
+          <col style={{ width: "160px" }} />
+        </colgroup>
 
-export default AlbumsTable;
+        <TableHead>
+          <TableRow>
+            {/* Empty header for the arrow column */}
+            <TableCell sx={{ textAlign: "center", p: 0 }} />
+            <TableCell>Album Title</TableCell>
+            <TableCell>Artist</TableCell>
+            <TableCell>Date Added</TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {albums.map((album) => (
+            <AlbumRow
+              key={album.AlbumID}
+              album={album}
+              isExpanded={expandedAlbum === album.AlbumID}
+              toggleExpand={() => handleRowClick(album.AlbumID)}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
