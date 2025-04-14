@@ -16,7 +16,7 @@ Coded by www.creative-tim.com
 import { useState, useEffect } from "react";
 
 // react-router components
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom"; //added useNavigate for search redirection
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
@@ -60,6 +60,11 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const [openMenu, setOpenMenu] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
 
+  // NEW: State for the search term
+  const [searchTerm, setSearchTerm] = useState("");
+  // NEW: Use navigate to redirect on search submit
+  const navigate = useNavigate();
+
   useEffect(() => {
     // Setting the navbar type
     if (fixedNavbar) {
@@ -90,6 +95,14 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
   const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
   const handleCloseMenu = () => setOpenMenu(false);
+
+  // NEW: Handle search submission when the Enter key is pressed
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      // Navigate to the search page with the query as a URL parameter
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    }
+  };
 
   // Render the notifications menu
   const renderMenu = () => (
@@ -136,7 +149,14 @@ function DashboardNavbar({ absolute, light, isMini }) {
         {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
             <MDBox pr={1}>
-              <MDInput label="Search here" />
+              <MDInput
+                label="Search here"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                inputProps={{
+                  onKeyDown: handleSearchKeyDown,
+                }}
+              />
             </MDBox>
             <MDBox color={light ? "white" : "inherit"}>
               <Link to="/authentication/sign-in/basic">
