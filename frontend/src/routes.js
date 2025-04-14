@@ -44,6 +44,7 @@ import Notifications from "layouts/notifications";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
+import SearchPage from "layouts/search";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -80,6 +81,14 @@ const routes = [
     icon: <Icon fontSize="small">person</Icon>,
     route: "/profile",
     component: <Profile />,
+  },
+  {
+    type: "collapse",
+    name: "Search",               // New route name
+    key: "search",
+    icon: <Icon fontSize="small">search</Icon>,  // Icon for search
+    route: "/search",             // URL route for search page
+    component: <SearchPage />,     // Your new Search page component
   },
   {
     type: "collapse",

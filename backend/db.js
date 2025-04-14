@@ -2,9 +2,9 @@ const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
   host: '127.0.0.1',
-  port: 3307,
+  port: 3306,
   user: 'root',
-  password: '', // Adjust if your MySQL password isn't empty
+  password: '2C33qs9v', // Adjust if your MySQL password isn't empty
   database: 'Spring25_Database_Management_Project',
   waitForConnections: true,
   connectionLimit: 10,
