@@ -6,7 +6,7 @@ const connection = mysql.createConnection({
   host: 'localhost', // Update this with your database host
   user: 'root', // Your MySQL username
   password: '', // Your MySQL password
-  database: 'Spring25_Database_Management_Project', // Your database name
+  database: 'for_project', // Your database name
   port: 3307 // Your MySQL port, default is usually 3306
 });
 const spotifyApi = new SpotifyWebApi({
@@ -113,41 +113,108 @@ async function GetTracks(album_Ids){
 }
 async function insertArtist(name, genre) {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO Artist (name, genre) VALUES (?, ?)', [name, genre], (err, result) => {
+    const insertQuery = 'INSERT INTO Artist (Name, Genre) VALUES (?, ?)';
+
+    connection.query(insertQuery, [name, genre], (err, result) => {
       if (err) {
-        reject("Error inserting artist: " + err);
+        if (err.code === 'ER_DUP_ENTRY') {
+          // Fetch existing artist ID
+          const selectQuery = 'SELECT ArtistID FROM Artist WHERE Name = ?';
+          connection.query(selectQuery, [name], (selectErr, selectResult) => {
+            if (selectErr) return reject("Error finding existing artist: " + selectErr);
+            if (selectResult.length > 0) {
+              const artistId = selectResult[0].ArtistID;
+
+              // DELETE old albums and songs tied to the artist
+              const deleteSongsQuery = 'DELETE FROM song WHERE ArtistId = ?';
+              const deleteAlbumsQuery = 'DELETE FROM artist_album WHERE ArtistId = ?';
+
+              connection.query(deleteSongsQuery, [artistId], (err1) => {
+                if (err1) return reject("Error deleting songs: " + err1);
+
+                connection.query(deleteAlbumsQuery, [artistId], (err2) => {
+                  if (err2) return reject("Error deleting albums: " + err2);
+
+                  // Optionally, update the genre
+                  const updateQuery = 'UPDATE Artist SET Genre = ? WHERE ArtistID = ?';
+                  connection.query(updateQuery, [genre, artistId], (err3) => {
+                    if (err3) return reject("Error updating artist: " + err3);
+                    console.log(`Updated and cleaned artist: ${name}`);
+                    resolve(artistId);
+                  });
+                });
+              });
+            } else {
+              return reject("Duplicate but couldn't find existing artist.");
+            }
+          });
+        } else {
+          return reject("Error inserting artist: " + err);
+        }
       } else {
-        resolve(result.insertId); // Return the artist_id
+        resolve(result.insertId);
       }
     });
   });
 }
 
-async function insertAlbum(artistId, name, year) {
+
+
+async function insertAlbum(artistId, name, images, year) {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO artist_album (ArtistId, Title, dateadded) VALUES (?, ?, ?)', 
-    [artistId, name, year], (err, result) => {
+    const insertQuery = 'INSERT INTO artist_album (ArtistId, Title, AlbumArt, dateadded) VALUES (?, ?, ?, ?)';
+    
+    connection.query(insertQuery, [artistId, name, images, year], (err, result) => {
       if (err) {
-        reject("Error inserting album: " + err);
+        if (err.code === 'ER_DUP_ENTRY') {
+          const selectQuery = 'SELECT AlbumId FROM artist_album WHERE ArtistId = ? AND Title = ?';
+          connection.query(selectQuery, [artistId, name], (selectErr, selectResult) => {
+            if (selectErr) return reject("Error finding existing album: " + selectErr);
+            if (selectResult.length > 0) {
+              console.log(`Duplicate album found: ${name}, using existing ID ${selectResult[0].AlbumId}`);
+              return resolve(selectResult[0].AlbumId);
+            } else {
+              return reject("Duplicate but couldn't find existing album.");
+            }
+          });
+        } else {
+          return reject("Error inserting album: " + err);
+        }
       } else {
-        resolve(result.insertId); // Return the album_id
+        resolve(result.insertId);
       }
     });
   });
 }
 
-async function insertSong(artistid, albumId, name,genre, year) {
+
+async function insertSong(artistid, albumId, name, genre, year) {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO song (ArtistId,AlbumId, name, genre, datecreated) VALUES (?, ?, ?, ?, ?)', 
-    [artistid,albumId, name, genre, year], (err, result) => {
+    const insertQuery = 'INSERT INTO song (ArtistId, AlbumId, name, genre, datecreated) VALUES (?, ?, ?, ?, ?)';
+    
+    connection.query(insertQuery, [artistid, albumId, name, genre, year], (err, result) => {
       if (err) {
-        reject("Error inserting song: " + err);
+        if (err.code === 'ER_DUP_ENTRY') {
+          const selectQuery = 'SELECT SongId FROM song WHERE AlbumId = ? AND name = ?';
+          connection.query(selectQuery, [albumId, name], (selectErr, selectResult) => {
+            if (selectErr) return reject("Error finding existing song: " + selectErr);
+            if (selectResult.length > 0) {
+              console.log(`Duplicate song found: ${name}, using existing ID ${selectResult[0].SongId}`);
+              return resolve(selectResult[0].SongId);
+            } else {
+              return reject("Duplicate but couldn't find existing song.");
+            }
+          });
+        } else {
+          return reject("Error inserting song: " + err);
+        }
       } else {
-        resolve(result.insertId); // Return the song_id
+        resolve(result.insertId);
       }
     });
   });
 }
+
 
 async function getAllArtistInfo() {
   const artistarray = [
@@ -173,7 +240,6 @@ async function getAllArtistInfo() {
     
     // Safely map album IDs
     const album_ids = album_info.map(a => a.id);
-    
     // Get tracks for these albums
     const song_list = await GetTracks(album_ids);
     
@@ -184,7 +250,7 @@ async function getAllArtistInfo() {
 
       // Insert album and song data
       for (const album of album_info) {
-        const albumId = await insertAlbum(artistId, album.name, album.year);
+        const albumId = await insertAlbum(artistId, album.name, album.art, album.year);
         console.log(`Inserted album: ${album.name} with ID: ${albumId}`);
 
         // Insert songs that belong to this album
