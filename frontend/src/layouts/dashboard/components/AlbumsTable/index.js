@@ -24,16 +24,39 @@ function AlbumRow({ album, isExpanded, toggleExpand, isHeader }) {
         onClick={!isHeader ? toggleExpand : undefined}
         sx={{ cursor: !isHeader ? "pointer" : "default" }}
       >
+        {/* Expand/collapse column */}
         <TableCell sx={{ textAlign: "center", p: 0, width: "50px" }}>
           {isHeader ? (
-            // Render an empty cell for the header (could also put a symbol if desired)
-            <Typography variant="body2" sx={{ fontWeight: "bold" }}>&nbsp;</Typography>
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+              &nbsp;
+            </Typography>
           ) : (
             <IconButton size="small">
               {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           )}
         </TableCell>
+
+        {/* Album Art column */}
+        <TableCell sx={{ width: "70px", textAlign: "center", p: 1 }}>
+          {isHeader ? (
+            <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+              Art
+            </Typography>
+          ) : (
+            album.AlbumArt ? (
+              <img
+                src={album.AlbumArt}
+                alt={album.Title}
+                style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "4px" }}
+              />
+            ) : (
+              <Typography variant="caption">No Art</Typography>
+            )
+          )}
+        </TableCell>
+
+        {/* Album Title column */}
         <TableCell>
           {isHeader ? (
             <Typography variant="body1" sx={{ fontWeight: "bold" }}>
@@ -43,6 +66,8 @@ function AlbumRow({ album, isExpanded, toggleExpand, isHeader }) {
             album.Title
           )}
         </TableCell>
+
+        {/* Artist column */}
         <TableCell>
           {isHeader ? (
             <Typography variant="body1" sx={{ fontWeight: "bold" }}>
@@ -52,6 +77,8 @@ function AlbumRow({ album, isExpanded, toggleExpand, isHeader }) {
             album.ArtistName
           )}
         </TableCell>
+
+        {/* Date Added column */}
         <TableCell sx={{ width: "160px" }}>
           {isHeader ? (
             <Typography variant="body1" sx={{ fontWeight: "bold" }}>
@@ -62,11 +89,11 @@ function AlbumRow({ album, isExpanded, toggleExpand, isHeader }) {
           )}
         </TableCell>
       </TableRow>
-
-      {/* Expanded row for songs: only for non-header rows */}
+      
+      {/* Expanded row for songs */}
       {!isHeader && (
         <TableRow>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
             <Collapse in={isExpanded} timeout="auto" unmountOnExit>
               <Box margin={2}>
                 <Typography variant="h6" gutterBottom>
@@ -99,7 +126,10 @@ export default function AlbumsTable() {
   useEffect(() => {
     axios
       .get("http://localhost:3005/api/albums?limit=100&offset=0")
-      .then((response) => setAlbums(response.data))
+      .then((response) => {
+        console.log("Albums data:", response.data);
+        setAlbums(response.data);
+      })
       .catch((err) => console.error("Error fetching albums:", err));
   }, []);
 
@@ -117,12 +147,13 @@ export default function AlbumsTable() {
       >
         <colgroup>
           <col style={{ width: "50px" }} />
+          <col style={{ width: "70px" }} />
           <col />
           <col />
           <col style={{ width: "160px" }} />
         </colgroup>
         <TableBody>
-          {/* Render the header row as a normal row with isHeader set */}
+          {/* Header row */}
           <AlbumRow isHeader={true} />
           {albums.map((album) => (
             <AlbumRow

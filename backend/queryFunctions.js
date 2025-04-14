@@ -133,6 +133,7 @@ async function getAlbumsWithSongs(limit = 100, offset = 0) {
     SELECT 
       ARTIST_ALBUM.AlbumID,
       ARTIST_ALBUM.Title AS AlbumTitle,
+      ARTIST_ALBUM.AlbumArt,    -- New column for album art URL
       ARTIST.Name AS ArtistName,
       ARTIST_ALBUM.DateAdded
     FROM ARTIST_ALBUM
@@ -163,6 +164,7 @@ async function getAlbumsWithSongs(limit = 100, offset = 0) {
         Title: album.AlbumTitle,
         ArtistName: album.ArtistName,
         DateAdded: album.DateAdded,
+        AlbumArt: album.AlbumArt, // New property for album art URL
         Songs: [],
       };
     });

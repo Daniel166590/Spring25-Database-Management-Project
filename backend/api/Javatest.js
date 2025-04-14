@@ -6,7 +6,7 @@ const connection = mysql.createConnection({
   host: 'localhost', // Update this with your database host
   user: 'root', // Your MySQL username
   password: '', // Your MySQL password
-  database: 'for_project', // Your database name
+  database: 'Spring25_Database_Management_Project', // Your database name
   port: 3307 // Your MySQL port, default is usually 3306
 });
 const spotifyApi = new SpotifyWebApi({
@@ -37,12 +37,13 @@ class Songs{
     this.year = year;
   }
 }
-class Album{
-  constructor(name, id,art, year){
-    this.name = name;
-    this.id = id;
-    this.art = art;
-    this.year = year; }
+class Album {
+  constructor(name, id, year, art) {
+    this.Title = name;
+    this.AlbumID = id;
+    this.year = year;
+    this.AlbumArt = art; // This must match the property you're checking in the frontend.
+  }
 }
 class submit{
   constructor(list_of_artists){
@@ -68,15 +69,22 @@ async function searchAlbums(artistId) {
     const data = await spotifyApi.clientCredentialsGrant();
     spotifyApi.setAccessToken(data.body.access_token);
 
-
     const result = await spotifyApi.getArtistAlbums(artistId);
-    
+
     if (!result.body || !result.body.items) {
       console.error("No album items returned. Response body:", result.body);
       return [];
     }
-    
-    const albums_list = result.body.items.map(album => new Album(album.name, album.id, album.images[0].url, album.release_date));
+
+    // Map using 'album.name' and safeguard images in case it's empty.
+    const albums_list = result.body.items.map(album => 
+      new Album(
+        album.name,                    // Use album.name instead of album.Title
+        album.id,
+        album.release_date,
+        album.images && album.images[0] ? album.images[0].url : null
+      )
+    );
     return albums_list;
   } catch (error) {
     if (error.statusCode === 429) {
@@ -84,7 +92,7 @@ async function searchAlbums(artistId) {
     } else {
       console.error("Spotify API error:", error);
     }
-    return []; // Return an empty array so that downstream code can handle it gracefully.
+    return []; // Return empty array so downstream code handles it gracefully.
   }
 }
 async function GetTracks(album_Ids){
@@ -239,7 +247,7 @@ async function getAllArtistInfo() {
     }
     
     // Safely map album IDs
-    const album_ids = album_info.map(a => a.id);
+    const album_ids = album_info.map(a => a.AlbumID);
     // Get tracks for these albums
     const song_list = await GetTracks(album_ids);
     
@@ -250,12 +258,13 @@ async function getAllArtistInfo() {
 
       // Insert album and song data
       for (const album of album_info) {
-        const albumId = await insertAlbum(artistId, album.name, album.art, album.year);
-        console.log(`Inserted album: ${album.name} with ID: ${albumId}`);
+        console.log(album.Title)
+        const albumId = await insertAlbum(artistId, album.Title, album.AlbumArt, album.year);
+        console.log(`Inserted album: ${album.Title} with ID: ${albumId}`);
 
         // Insert songs that belong to this album
         for (const song of song_list) {
-          if (song.album === album.name) {
+          if (song.album === album.Title) {
             await insertSong(artistId, albumId, song.name, genre, song.year);
             console.log(`Inserted song: ${song.name}`);
           }
