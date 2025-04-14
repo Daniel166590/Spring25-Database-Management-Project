@@ -37,9 +37,10 @@ class Songs{
   }
 }
 class Album{
-  constructor(name, id,year){
+  constructor(name, id,art, year){
     this.name = name;
     this.id = id;
+    this.art = art;
     this.year = year; }
 }
 class submit{
@@ -69,7 +70,8 @@ async function searchAlbums(artistName){
     //console.log('Albums \n');
     let albums_list = [];
     result.body.items.forEach((album,i) => {
-      let albums = new Album(album.name, album.id, album.release_date);
+      
+      let albums = new Album(album.name, album.id, album.images[0].url, album.release_date);
         //console.log(`${i+1}. ${album.name} (${album.release_date})`);
         albums_list.push(albums);
     })
