@@ -182,7 +182,64 @@ async function getAlbumsWithSongs(limit = 100, offset = 0) {
   }
 }
 
-module.exports = { getAlbumsWithSongs };
+async function searchAlbums(searchTerm, limit = 100, offset = 0) {
+  const connection = await pool.getConnection();
+  try {
+    // Search query: using LIKE to match the term in the album title or artist name
+    const searchQuery = `
+      SELECT 
+        ARTIST_ALBUM.AlbumID,
+        ARTIST_ALBUM.Title AS AlbumTitle,
+        ARTIST.Name AS ArtistName,
+        ARTIST_ALBUM.DateAdded
+      FROM ARTIST_ALBUM
+      JOIN ARTIST ON ARTIST.ArtistID = ARTIST_ALBUM.ArtistID
+      WHERE ARTIST_ALBUM.Title LIKE ? OR ARTIST.Name LIKE ?
+      ORDER BY ARTIST_ALBUM.DateAdded DESC
+      LIMIT ? OFFSET ?;
+    `;
+    // Use wildcards on both sides of the searchTerm
+    const likeTerm = `%${searchTerm}%`;
+    const [albums] = await connection.execute(searchQuery, [likeTerm, likeTerm, limit, offset]);
+
+    if (albums.length === 0) return [];
+
+    // Get the associated songs for these albums
+    const albumIds = albums.map(album => album.AlbumID);
+    const sqlSongs = `
+      SELECT SongID, AlbumID, Name, Genre
+      FROM SONG
+      WHERE AlbumID IN (?);
+    `;
+    const [songs] = await connection.execute(sqlSongs, [albumIds]);
+
+    // Create a mapping for album data
+    const albumMap = {};
+    albums.forEach(album => {
+      albumMap[album.AlbumID] = {
+        AlbumID: album.AlbumID,
+        Title: album.AlbumTitle,
+        ArtistName: album.ArtistName,
+        DateAdded: album.DateAdded,
+        Songs: [],
+      };
+    });
+    songs.forEach(song => {
+      if (albumMap[song.AlbumID]) {
+        albumMap[song.AlbumID].Songs.push(song);
+      }
+    });
+
+    return Object.values(albumMap);
+  } catch (error) {
+    console.error("Database query error in searchAlbums:", error);
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+module.exports = { getAlbumsWithSongs,searchAlbums };
 
 // Example usage
 /*(async () => {
