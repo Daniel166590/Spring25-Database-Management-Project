@@ -186,6 +186,9 @@ async function searchAlbums(searchTerm, limit = 100, offset = 0) {
   const connection = await pool.getConnection();
   try {
     // Search query: using LIKE to match the term in the album title or artist name
+    const safeLimit = parseInt(limit, 10);
+    const safeOffset = parseInt(offset, 10);
+    
     const searchQuery = `
       SELECT 
         ARTIST_ALBUM.AlbumID,
@@ -196,12 +199,13 @@ async function searchAlbums(searchTerm, limit = 100, offset = 0) {
       JOIN ARTIST ON ARTIST.ArtistID = ARTIST_ALBUM.ArtistID
       WHERE ARTIST_ALBUM.Title LIKE ? OR ARTIST.Name LIKE ?
       ORDER BY ARTIST_ALBUM.DateAdded DESC
-      LIMIT ? OFFSET ?;
+      LIMIT ${safeLimit} OFFSET ${safeOffset};
     `;
-    // Use wildcards on both sides of the searchTerm
+    
     const likeTerm = `%${searchTerm}%`;
-    const [albums] = await connection.execute(searchQuery, [likeTerm, likeTerm, limit, offset]);
-
+    // Only bind the two parameters for the LIKE conditions.
+    const [albums] = await connection.execute(searchQuery, [likeTerm, likeTerm]);
+    
     if (albums.length === 0) return [];
 
     // Get the associated songs for these albums
