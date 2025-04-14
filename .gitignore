@@ -55,3 +55,6 @@ Desktop.ini
 *.bak
 *.tmp
 *.orig
+
+# Ignore db file
+backend/db.js
