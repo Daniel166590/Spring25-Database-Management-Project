@@ -185,14 +185,16 @@ async function getAlbumsWithSongs(limit = 100, offset = 0) {
 async function searchAlbums(searchTerm, limit = 100, offset = 0) {
   const connection = await pool.getConnection();
   try {
-    // Search query: using LIKE to match the term in the album title or artist name
+    // Convert limit and offset safely
     const safeLimit = parseInt(limit, 10);
     const safeOffset = parseInt(offset, 10);
     
+    // Updated SQL query with AlbumArt included in the SELECT clause
     const searchQuery = `
       SELECT 
         ARTIST_ALBUM.AlbumID,
         ARTIST_ALBUM.Title AS AlbumTitle,
+        ARTIST_ALBUM.AlbumArt,    -- New column for album art URL
         ARTIST.Name AS ArtistName,
         ARTIST_ALBUM.DateAdded
       FROM ARTIST_ALBUM
@@ -203,21 +205,21 @@ async function searchAlbums(searchTerm, limit = 100, offset = 0) {
     `;
     
     const likeTerm = `%${searchTerm}%`;
-    // Only bind the two parameters for the LIKE conditions.
+    // Execute the query binding only the two parameters for LIKE.
     const [albums] = await connection.execute(searchQuery, [likeTerm, likeTerm]);
     
     if (albums.length === 0) return [];
 
-    // Get the associated songs for these albums
+    // Get associated songs for these albums
     const albumIds = albums.map(album => album.AlbumID);
     const sqlSongs = `
       SELECT SongID, AlbumID, Name, Genre
       FROM SONG
       WHERE AlbumID IN (?);
     `;
-    const [songs] = await connection.execute(sqlSongs, [albumIds]);
+    const [songs] = await connection.query(sqlSongs, [albumIds]);
 
-    // Create a mapping for album data
+    // Create a mapping for album data, including AlbumArt
     const albumMap = {};
     albums.forEach(album => {
       albumMap[album.AlbumID] = {
@@ -225,9 +227,11 @@ async function searchAlbums(searchTerm, limit = 100, offset = 0) {
         Title: album.AlbumTitle,
         ArtistName: album.ArtistName,
         DateAdded: album.DateAdded,
+        AlbumArt: album.AlbumArt,  // New property for album art URL
         Songs: [],
       };
     });
+
     songs.forEach(song => {
       if (albumMap[song.AlbumID]) {
         albumMap[song.AlbumID].Songs.push(song);

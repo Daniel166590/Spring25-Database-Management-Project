@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout"; // Import the layout container
+import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
@@ -58,18 +58,49 @@ export default function SearchPage() {
         <Typography color="error">{error}</Typography>
       ) : albums.length > 0 ? (
         albums.map((album) => (
-          <Box key={album.AlbumID} sx={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "1rem", borderRadius: "4px" }}>
-            <Typography variant="h6">{album.Title}</Typography>
-            <Typography variant="subtitle1">by {album.ArtistName}</Typography>
-            {album.Songs && album.Songs.length > 0 && (
-              <Box component="ul" sx={{ paddingLeft: "1.5rem", marginTop: "0.5rem" }}>
-                {album.Songs.map((song) => (
-                  <li key={song.SongID}>
-                    {song.Name} <em>({song.Genre})</em>
-                  </li>
-                ))}
-              </Box>
+          <Box
+            key={album.AlbumID}
+            sx={{
+              border: "1px solid #ccc",
+              padding: "1rem",
+              marginBottom: "1rem",
+              borderRadius: "4px",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            {album.AlbumArt && (
+              <Box
+                component="img"
+                src={album.AlbumArt}
+                alt={`${album.Title} album art`}
+                sx={{
+                  width: "80px",
+                  height: "80px",
+                  objectFit: "cover",
+                  marginRight: "1rem",
+                  borderRadius: "4px",
+                }}
+              />
             )}
+            <Box>
+              <Typography variant="h6">{album.Title}</Typography>
+              <Typography variant="subtitle1">by {album.ArtistName}</Typography>
+              {album.Songs && album.Songs.length > 0 ? (
+                <Box component="ul" sx={{ paddingLeft: "1.5rem", marginTop: "0.5rem" }}>
+                  {album.Songs.map((song) => (
+                    <li key={song.SongID}>
+                      {song.Name} <em>({song.Genre})</em>
+                    </li>
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No songs available.
+                </Typography>
+              )}
+            </Box>
           </Box>
         ))
       ) : (
@@ -79,7 +110,6 @@ export default function SearchPage() {
   );
 
   return (
-    // Wrap the search page content in DashboardLayout so it respects the sidebar
     <DashboardLayout>
       {content}
     </DashboardLayout>
