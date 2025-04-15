@@ -52,6 +52,7 @@ import { useMaterialUIController, setMiniSidenav, setOpenConfigurator } from "co
 // Images
 import brandWhite from "assets/images/logo-ct.png";
 import brandDark from "assets/images/logo-ct-dark.png";
+import logo from "assets/images/mooflixz-logo.png";
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -154,8 +155,8 @@ export default function App() {
           <>
             <Sidenav
               color={sidenavColor}
-              brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-              brandName="Music Database"
+              brand={(transparentSidenav && !darkMode) || whiteSidenav ? logo : logo}
+              brandName="Mooflixz"
               routes={routes}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
@@ -178,8 +179,8 @@ export default function App() {
         <>
           <Sidenav
             color={sidenavColor}
-            brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-            brandName="Music Database"
+            brand={(transparentSidenav && !darkMode) || whiteSidenav ? logo : logo}
+            brandName="Mooflixz"
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
