@@ -15,6 +15,7 @@ import BasicLayout from "layouts/authentication/components/BasicLayout";
 
 // Images
 import bgImage from "assets/images/bg-sign-in-basic.jpeg";
+import logo from "assets/images/mooflixz-logo.png";
 
 function Basic() {
   // Redirect the browser to your backend's Microsoft authentication endpoint
@@ -25,21 +26,9 @@ function Basic() {
   return (
     <BasicLayout image={bgImage}>
       <Card>
-        <MDBox
-          variant="gradient"
-          bgColor="info"
-          borderRadius="lg"
-          coloredShadow="info"
-          mx={2}
-          mt={-3}
-          p={2}
-          mb={1}
-          textAlign="center"
-        >
-          <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-            Sign in with Microsoft
-          </MDTypography>
-        </MDBox>
+      <MDBox textAlign="center" mt={2}>
+        <img src={logo} alt="Mooflixz Logo" style={{ height: "400px", marginBottom: "1rem" }} />
+      </MDBox>
         <MDBox pt={4} pb={3} px={3} textAlign="center">
           <MDButton variant="gradient" color="info" fullWidth onClick={handleMicrosoftLogin}>
             Sign in with Microsoft
