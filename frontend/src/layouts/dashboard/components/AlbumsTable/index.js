@@ -95,21 +95,58 @@ function AlbumRow({ album, isExpanded, toggleExpand, isHeader }) {
         <TableRow>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
             <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-              <Box margin={2}>
-                <Typography variant="h6" gutterBottom>
-                  Songs in {album.Title}
-                </Typography>
-                {album.Songs && album.Songs.length > 0 ? (
-                  album.Songs.map((song) => (
-                    <Typography key={song.SongID} variant="body2">
-                      🎵 {song.Name} – <i>{song.Genre}</i>
-                    </Typography>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="textSecondary">
-                    No songs available.
-                  </Typography>
-                )}
+              <Box
+                m={2}
+                display="flex"
+                alignItems="flex-start"
+                sx={{ overflowX: "auto" }}
+              >
+                {/* Left column: larger album art */}
+                <Box
+                  component="img"
+                  src={album.AlbumArt}
+                  alt={album.Title}
+                  sx={{
+                    width: 400,
+                    height: 400,
+                    objectFit: "cover",
+                    borderRadius: 1,
+                    flexShrink: 0,
+                    mr: 2,
+                  }}
+                />
+
+                {/* Middle & Right columns */}
+                <Box display="flex" flex="1" gap={2}>
+                  {(() => {
+                    const songs = album.Songs || [];
+                    const mid = Math.ceil(songs.length / 2);
+                    const firstHalf = songs.slice(0, mid);
+                    const secondHalf = songs.slice(mid);
+
+                    return (
+                      <>
+                        {/* Middle column */}
+                        <Box flex="1">
+                          {firstHalf.map((song) => (
+                            <Typography key={song.SongID} variant="body2" gutterBottom>
+                              🎵 {song.Name} – <i>{song.Genre}</i>
+                            </Typography>
+                          ))}
+                        </Box>
+
+                        {/* Right column */}
+                        <Box flex="1">
+                          {secondHalf.map((song) => (
+                            <Typography key={song.SongID} variant="body2" gutterBottom>
+                              🎵 {song.Name} – <i>{song.Genre}</i>
+                            </Typography>
+                          ))}
+                        </Box>
+                      </>
+                    );
+                  })()}
+                </Box>
               </Box>
             </Collapse>
           </TableCell>

@@ -1,4 +1,4 @@
-// layouts/search/index.js
+// src/layouts/search/index.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
@@ -17,7 +17,10 @@ export default function SearchPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://localhost:3005/api/search?q=${encodeURIComponent(searchTerm)}`);
+      const response = await axios.get(
+        `http://localhost:3005/api/search?q=${encodeURIComponent(searchTerm)}`,
+        { withCredentials: true }
+      );
       setAlbums(response.data);
     } catch (err) {
       console.error("Error fetching search results:", err);
@@ -57,61 +60,89 @@ export default function SearchPage() {
       ) : error ? (
         <Typography color="error">{error}</Typography>
       ) : albums.length > 0 ? (
-        albums.map((album) => (
-          <Box
-            key={album.AlbumID}
-            sx={{
-              border: "1px solid #ccc",
-              padding: "1rem",
-              marginBottom: "1rem",
-              borderRadius: "4px",
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            {album.AlbumArt && (
-              <Box
-                component="img"
-                src={album.AlbumArt}
-                alt={`${album.Title} album art`}
-                sx={{
-                  width: "80px",
-                  height: "80px",
-                  objectFit: "cover",
-                  marginRight: "1rem",
-                  borderRadius: "4px",
-                }}
-              />
-            )}
-            <Box>
-              <Typography variant="h6">{album.Title}</Typography>
-              <Typography variant="subtitle1">by {album.ArtistName}</Typography>
-              {album.Songs && album.Songs.length > 0 ? (
-                <Box component="ul" sx={{ paddingLeft: "1.5rem", marginTop: "0.5rem" }}>
-                  {album.Songs.map((song) => (
-                    <li key={song.SongID}>
-                      {song.Name} <em>({song.Genre})</em>
-                    </li>
-                  ))}
+        albums.map((album) => {
+          const songs = album.Songs || [];
+          const midIndex = Math.ceil(songs.length / 2);
+          const firstHalf = songs.slice(0, midIndex);
+          const secondHalf = songs.slice(midIndex);
+
+          return (
+            <Box
+              key={album.AlbumID}
+              sx={{
+                border: "1px solid #ccc",
+                padding: "1rem",
+                marginBottom: "1rem",
+                borderRadius: "4px",
+              }}
+            >
+              <Box display="flex" alignItems="flex-start" sx={{ gap: 2, flexWrap: "wrap" }}>
+                {/* Left column: Album art */}
+                {album.AlbumArt && (
+                  <Box
+                    component="img"
+                    src={album.AlbumArt}
+                    alt={`${album.Title} album art`}
+                    sx={{
+                      width: 400,
+                      height: 400,
+                      objectFit: "cover",
+                      borderRadius: "4px",
+                      flexShrink: 0,
+                    }}
+                  />
+                )}
+
+                {/* Right: title, artist, and two song columns */}
+                <Box flex="1">
+                  <Typography variant="h6">{album.Title}</Typography>
+                  <Typography variant="subtitle1" gutterBottom>
+                    by {album.ArtistName}
+                  </Typography>
+
+                  {songs.length > 0 ? (
+                    <Box display="flex" sx={{ gap: 2, mt: 1 }}>
+                      {/* Middle column */}
+                      <Box
+                        component="ul"
+                        sx={{ paddingLeft: "1.25rem", m: 0, flex: 1 }}
+                      >
+                        {firstHalf.map((song) => (
+                          <li key={song.SongID}>
+                            {song.Name} <em>({song.Genre})</em>
+                          </li>
+                        ))}
+                      </Box>
+
+                      {/* Rightmost column */}
+                      <Box
+                        component="ul"
+                        sx={{ paddingLeft: "1.25rem", m: 0, flex: 1 }}
+                      >
+                        {secondHalf.map((song) => (
+                          <li key={song.SongID}>
+                            {song.Name} <em>({song.Genre})</em>
+                          </li>
+                        ))}
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="textSecondary">
+                      No songs available.
+                    </Typography>
+                  )}
                 </Box>
-              ) : (
-                <Typography variant="body2" color="textSecondary">
-                  No songs available.
-                </Typography>
-              )}
+              </Box>
             </Box>
-          </Box>
-        ))
+          );
+        })
       ) : (
-        <Typography>{query.trim() !== "" ? "No results found." : "Type a search query above."}</Typography>
+        <Typography>
+          {query.trim() !== "" ? "No results found." : "Type a search query above."}
+        </Typography>
       )}
     </Box>
   );
 
-  return (
-    <DashboardLayout>
-      {content}
-    </DashboardLayout>
-  );
+  return <DashboardLayout>{content}</DashboardLayout>;
 }
