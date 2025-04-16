@@ -231,7 +231,7 @@ async function insertAlbum(artistId, name, images, year) {
 
 async function insertSong(artistid, albumId, name, genre, year, ytlink) {
   return new Promise((resolve, reject) => {
-    const insertQuery = 'INSERT INTO song (ArtistId, AlbumId, name, genre, datecreated, YouTubeLink) VALUES (?, ?, ?, ?, ?, ?)';
+    const insertQuery = 'INSERT INTO song (ArtistId, AlbumId, name, genre, datecreated, ytlink) VALUES (?, ?, ?, ?, ?, ?)';
     
     connection.query(insertQuery, [artistid, albumId, name, genre, year, ytlink], (err, result) => {
       if (err) {
