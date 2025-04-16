@@ -31,10 +31,11 @@ class Artist{
   }
 }
 class Songs{
-  constructor(name, album, year){
+  constructor(name, album, year, ytlink){
     this.name = name;
     this.album = album;
     this.year = year;
+    this.ytlink = ytlink;
   }
 }
 class Album {
@@ -295,7 +296,7 @@ async function getAllArtistInfo() {
           if (song.album === album.Title) {
             const ytlink = await getYouTubeLink(song.name, artistName);
             await insertSong(artistId, albumId, song.name, genre, song.year, ytlink);
-            songsForAlbum.push(new Songs(song.name, song.album, song.year));
+            songsForAlbum.push(new Songs(song.name, song.album, song.year, ytlink));
           }
         }
 
