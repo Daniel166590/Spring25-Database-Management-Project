@@ -4,6 +4,8 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { Box, TextField, Typography, CircularProgress } from "@mui/material";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
+import DashboardNavbar from "examples/Navbars/DashboardNavbar";
+import Footer from "examples/Footer";
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
@@ -12,6 +14,15 @@ export default function SearchPage() {
   const [albums, setAlbums] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // utility to split text into parts, marking matches
+function highlightText(text, query) {
+  if (!query) return [text];
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi");
+  return text.split(regex).map((part, i) =>
+    regex.test(part) ? <mark key={i}>{part}</mark> : part
+  );
+}
 
   const fetchSearchResults = async (searchTerm) => {
     setIsLoading(true);
@@ -50,7 +61,7 @@ export default function SearchPage() {
       <TextField
         fullWidth
         variant="outlined"
-        label="Search by album title or artist"
+        label="Search by album, artist, or song name"
         value={query}
         onChange={handleInputChange}
         sx={{ marginBottom: "1rem" }}
@@ -102,26 +113,17 @@ export default function SearchPage() {
 
                   {songs.length > 0 ? (
                     <Box display="flex" sx={{ gap: 2, mt: 1 }}>
-                      {/* Middle column */}
-                      <Box
-                        component="ul"
-                        sx={{ paddingLeft: "1.25rem", m: 0, flex: 1 }}
-                      >
+                      <Box component="ul" sx={{ paddingLeft: "1.25rem", m: 0, flex: 1 }}>
                         {firstHalf.map((song) => (
                           <li key={song.SongID}>
-                            {song.Name} <em>({song.Genre})</em>
+                            {highlightText(song.Name, query)} <em>({song.Genre})</em>
                           </li>
                         ))}
                       </Box>
-
-                      {/* Rightmost column */}
-                      <Box
-                        component="ul"
-                        sx={{ paddingLeft: "1.25rem", m: 0, flex: 1 }}
-                      >
+                      <Box component="ul" sx={{ paddingLeft: "1.25rem", m: 0, flex: 1 }}>
                         {secondHalf.map((song) => (
                           <li key={song.SongID}>
-                            {song.Name} <em>({song.Genre})</em>
+                            {highlightText(song.Name, query)} <em>({song.Genre})</em>
                           </li>
                         ))}
                       </Box>
@@ -144,5 +146,11 @@ export default function SearchPage() {
     </Box>
   );
 
-  return <DashboardLayout>{content}</DashboardLayout>;
+  return (
+    <DashboardLayout>
+      <DashboardNavbar />
+      {content}
+      <Footer />
+    </DashboardLayout>
+  );
 }

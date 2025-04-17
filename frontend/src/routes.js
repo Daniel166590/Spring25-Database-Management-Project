@@ -45,6 +45,7 @@ import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 import SearchPage from "layouts/search";
+import Playlist from "layouts/playlist";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -73,6 +74,14 @@ const routes = [
     icon: <Icon fontSize="small">search</Icon>,  // Icon for search
     route: "/search",             // URL route for search page
     component: <SearchPage />,     // Your new Search page component
+  },
+  {
+    type: "collapse",
+    name: "Playlist",
+    key: "playlist",
+    icon: <Icon fontSize="small">playlist_play</Icon>,
+    route: "/playlist",
+    component: <Playlist />,
   },
   {
     type: "collapse",

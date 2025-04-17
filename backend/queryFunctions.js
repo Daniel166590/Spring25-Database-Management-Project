@@ -176,62 +176,57 @@ async function getAlbumsWithSongs(limit = 100, offset = 0) {
 
 // Search albums along with their songs (including ytlink)
 async function searchAlbums(searchTerm, limit = 100, offset = 0) {
-  const safeLimit  = parseInt(limit, 10);
-  const safeOffset = parseInt(offset, 10);
-  const likeTerm   = `%${searchTerm}%`;
-
-  const sqlAlbums = `
-    SELECT 
-      ARTIST_ALBUM.AlbumID,
-      ARTIST_ALBUM.Title AS AlbumTitle,
-      ARTIST_ALBUM.AlbumArt,
-      ARTIST.Name AS ArtistName,
-      ARTIST_ALBUM.DateAdded
-    FROM ARTIST_ALBUM
-    JOIN ARTIST ON ARTIST.ArtistID = ARTIST_ALBUM.ArtistID
-    WHERE ARTIST_ALBUM.Title LIKE ? OR ARTIST.Name LIKE ?
-    ORDER BY ARTIST_ALBUM.DateAdded DESC
-    LIMIT ${safeLimit} OFFSET ${safeOffset};
-  `;
-
   const connection = await pool.getConnection();
   try {
-    const [albums] = await connection.execute(sqlAlbums, [likeTerm, likeTerm]);
+    // Convert limit and offset safely
+    const safeLimit = parseInt(limit, 10);
+    const safeOffset = parseInt(offset, 10);
+    
+    // Updated SQL query with AlbumArt included in the SELECT clause
+    const searchQuery = `
+      SELECT 
+        ARTIST_ALBUM.AlbumID,
+        ARTIST_ALBUM.Title AS AlbumTitle,
+        ARTIST_ALBUM.AlbumArt,    -- New column for album art URL
+        ARTIST.Name AS ArtistName,
+        ARTIST_ALBUM.DateAdded
+      FROM ARTIST_ALBUM
+      JOIN ARTIST ON ARTIST.ArtistID = ARTIST_ALBUM.ArtistID
+      WHERE ARTIST_ALBUM.Title LIKE ? OR ARTIST.Name LIKE ?
+      ORDER BY ARTIST_ALBUM.DateAdded DESC
+      LIMIT ${safeLimit} OFFSET ${safeOffset};
+    `;
+    
+    const likeTerm = `%${searchTerm}%`;
+    // Execute the query binding only the two parameters for LIKE.
+    const [albums] = await connection.execute(searchQuery, [likeTerm, likeTerm]);
+    
     if (albums.length === 0) return [];
 
-    const albumIds = albums.map(a => a.AlbumID);
+    // Get associated songs for these albums
+    const albumIds = albums.map(album => album.AlbumID);
     const sqlSongs = `
-      SELECT SongID,
-             AlbumID,
-             Name,
-             Genre,
-             ytlink
+      SELECT SongID, AlbumID, Name, Genre
       FROM SONG
       WHERE AlbumID IN (?);
     `;
-    const [songs] = await pool.query(sqlSongs, [albumIds]);
+    const [songs] = await connection.query(sqlSongs, [albumIds]);
 
+    // Create a mapping for album data, including AlbumArt
     const albumMap = {};
-    albums.forEach(a => {
-      albumMap[a.AlbumID] = {
-        AlbumID: a.AlbumID,
-        Title: a.AlbumTitle,
-        ArtistName: a.ArtistName,
-        DateAdded: a.DateAdded,
-        AlbumArt: a.AlbumArt,
+    albums.forEach(album => {
+      albumMap[album.AlbumID] = {
+        AlbumID: album.AlbumID,
+        Title: album.AlbumTitle,
+        ArtistName: album.ArtistName,
+        DateAdded: album.DateAdded,
+        AlbumArt: album.AlbumArt,  // New property for album art URL
         Songs: [],
       };
-    });
-    songs.forEach(s => {
-      if (albumMap[s.AlbumID]) {
-        albumMap[s.AlbumID].Songs.push({
-          SongID: s.SongID,
-          Name: s.Name,
-          Genre: s.Genre,
-          ytlink: s.ytlink,
-        });
-      }
-    });
+    }
+    for (const s of songs) {
+      if (albumMap[s.AlbumID]) albumMap[s.AlbumID].Songs.push(s);
+    }
 
     return Object.values(albumMap);
   } catch (error) {
