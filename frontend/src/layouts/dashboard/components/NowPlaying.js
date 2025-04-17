@@ -15,14 +15,14 @@ export default function NowPlaying({ song, onStop, width = 600 }) {
       sx={{
         position: "fixed",
         bottom: 16,
-        left: `calc(50% - ${width / 2}px)`,
-        width: `${width}px`,
-        height: 80,               // fixed slim height
+        left: `calc(50% - ${width / 5}px)`,
+        width: `${width/1.5}px`,
+        height: 100,               // fixed slim height
         bgcolor: "background.paper",
         opacity: 100,
         boxShadow: 3,
         borderRadius: 1,
-        px: 2,                    // horizontal padding only
+        px: 5,                    // horizontal padding only
         display: "flex",
         alignItems: "center",     // vertically center contents
         justifyContent: "space-between",
@@ -46,8 +46,8 @@ export default function NowPlaying({ song, onStop, width = 600 }) {
       <Box
         sx={{
           position: "relative",
-          width: 120,    // small player width
-          height: 60,    // small player height
+          width: 240,    // small player width
+          height: 100,    // small player height
           flexShrink: 0,
         }}
       >
