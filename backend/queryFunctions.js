@@ -185,58 +185,80 @@ async function getAlbumsWithSongs(limit = 100, offset = 0) {
 async function searchAlbums(searchTerm, limit = 100, offset = 0) {
   const connection = await pool.getConnection();
   try {
-    // Convert limit and offset safely
-    const safeLimit = parseInt(limit, 10);
+    const safeLimit  = parseInt(limit, 10);
     const safeOffset = parseInt(offset, 10);
-    
-    // Updated SQL query with AlbumArt included in the SELECT clause
-    const searchQuery = `
-      SELECT 
-        ARTIST_ALBUM.AlbumID,
-        ARTIST_ALBUM.Title AS AlbumTitle,
-        ARTIST_ALBUM.AlbumArt,    -- New column for album art URL
-        ARTIST.Name AS ArtistName,
-        ARTIST_ALBUM.DateAdded
-      FROM ARTIST_ALBUM
-      JOIN ARTIST ON ARTIST.ArtistID = ARTIST_ALBUM.ArtistID
-      WHERE ARTIST_ALBUM.Title LIKE ? OR ARTIST.Name LIKE ?
-      ORDER BY ARTIST_ALBUM.DateAdded DESC
-      LIMIT ${safeLimit} OFFSET ${safeOffset};
-    `;
-    
-    const likeTerm = `%${searchTerm}%`;
-    // Execute the query binding only the two parameters for LIKE.
-    const [albums] = await connection.execute(searchQuery, [likeTerm, likeTerm]);
-    
-    if (albums.length === 0) return [];
+    const likeTerm   = `%${searchTerm}%`;
 
-    // Get associated songs for these albums
-    const albumIds = albums.map(album => album.AlbumID);
-    const sqlSongs = `
+    // 1) Albums matching title or artist
+    const albumQuery = `
+      SELECT ARTIST_ALBUM.AlbumID
+      FROM ARTIST_ALBUM
+      JOIN ARTIST
+        ON ARTIST.ArtistID = ARTIST_ALBUM.ArtistID
+      WHERE ARTIST_ALBUM.Title LIKE ?
+         OR ARTIST.Name      LIKE ?
+    `;
+    const [albumRows] = await connection.execute(albumQuery, [likeTerm, likeTerm]);
+
+    // 2) Albums matching song name
+    const songQuery = `
+      SELECT DISTINCT AlbumID
+      FROM SONG
+      WHERE Name LIKE ?
+        AND AlbumID IS NOT NULL
+    `;
+    const [songRows] = await connection.execute(songQuery, [likeTerm]);
+
+    // 3) Combine unique AlbumIDs
+    const albumIdSet = new Set([
+      ...albumRows.map(r => r.AlbumID),
+      ...songRows.map(r => r.AlbumID),
+    ]);
+
+    if (albumIdSet.size === 0) return [];
+
+    const albumIds = Array.from(albumIdSet);
+
+    // 4) Fetch full album details (with art & artist), applying limit/offset
+    const albumsSql = `
+      SELECT 
+        aa.AlbumID,
+        aa.Title    AS AlbumTitle,
+        aa.AlbumArt,
+        ar.Name     AS ArtistName,
+        aa.DateAdded
+      FROM ARTIST_ALBUM aa
+      JOIN ARTIST       ar
+        ON ar.ArtistID = aa.ArtistID
+      WHERE aa.AlbumID IN (? )
+      ORDER BY aa.DateAdded DESC
+      LIMIT ${safeLimit} OFFSET ${safeOffset}
+    `;
+    const [albums] = await connection.query(albumsSql, [albumIds]);
+
+    // 5) Pull in all songs for those albums
+    const songsSql = `
       SELECT SongID, AlbumID, Name, Genre
       FROM SONG
       WHERE AlbumID IN (?);
     `;
-    const [songs] = await connection.query(sqlSongs, [albumIds]);
+    const [songs] = await connection.query(songsSql, [albumIds]);
 
-    // Create a mapping for album data, including AlbumArt
+    // 6) Build your response structure
     const albumMap = {};
-    albums.forEach(album => {
-      albumMap[album.AlbumID] = {
-        AlbumID: album.AlbumID,
-        Title: album.AlbumTitle,
-        ArtistName: album.ArtistName,
-        DateAdded: album.DateAdded,
-        AlbumArt: album.AlbumArt,  // New property for album art URL
-        Songs: [],
+    for (const alb of albums) {
+      albumMap[alb.AlbumID] = {
+        AlbumID:    alb.AlbumID,
+        Title:      alb.AlbumTitle,
+        ArtistName: alb.ArtistName,
+        DateAdded:  alb.DateAdded,
+        AlbumArt:   alb.AlbumArt,
+        Songs:      [],
       };
-    });
-
-    songs.forEach(song => {
-      if (albumMap[song.AlbumID]) {
-        albumMap[song.AlbumID].Songs.push(song);
-      }
-    });
+    }
+    for (const s of songs) {
+      if (albumMap[s.AlbumID]) albumMap[s.AlbumID].Songs.push(s);
+    }
 
     return Object.values(albumMap);
   } catch (error) {
