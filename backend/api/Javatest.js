@@ -5,9 +5,9 @@ require('dotenv').config();
 const connection = mysql.createConnection({
   host: 'localhost', // Update this with your database host
   user: 'root', // Your MySQL username
-  password: '', // Your MySQL password
+  password: '2C33qs9v', // Your MySQL password
   database: 'Spring25_Database_Management_Project', //'Spring25_Database_Management_Project', // Your database name
-  port: 3307 // Your MySQL port, default is usually 3306
+  port: 3306 // Your MySQL port, default is usually 3306
 });
 const spotifyApi = new SpotifyWebApi({
   clientId: '2d04cb15fa944b838588a89c9f961026',
