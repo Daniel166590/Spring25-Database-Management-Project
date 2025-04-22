@@ -17,13 +17,19 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import AddIcon from "@mui/icons-material/Add";
 import NowPlaying from "../NowPlaying";
 
 // Renders a song row with play button only
-function SongRow({ song, isPlaying, onToggle }) {
+function SongRow({ song, isPlaying, onToggle, onAdd }) {
   const handleClick = (e) => {
     e.stopPropagation();
     onToggle(song);
+  };
+
+  const handleAddClick = (e) => {
+    e.stopPropagation();           // Prevent collapse toggle
+    onAdd(song.SongID);            // Call parent to add to playlist
   };
 
   return (
@@ -36,6 +42,9 @@ function SongRow({ song, isPlaying, onToggle }) {
       <Typography variant="body2">
         🎵 {song.Name} <i>({song.Genre})</i>
       </Typography>
+      <IconButton size="small" onClick={handleAddClick}>
++       <AddIcon />
++     </IconButton>
     </Box>
   );
 }
@@ -79,6 +88,21 @@ export default function AlbumsTable() {
     } else {
       setSortKey(key);
       setSortDirection("asc");
+    }
+  };
+
+  const addToPlaylist = async (songId) => {
+    try {
+      // assume you stored the user’s playlistId in localStorage after login:
+      const playlistId = localStorage.getItem("playlistId");
+      await axios.post(
+        "http://localhost:3005/api/playlist/add",
+        { playlistId, songId },
+        { withCredentials: true }
+      );
+      // maybe show a toast/success indicator here
+    } catch (err) {
+      console.error("Add to playlist failed", err);
     }
   };
 
@@ -232,6 +256,7 @@ export default function AlbumsTable() {
                                           prev?.SongID === s.SongID ? null : s
                                         )
                                       }
+                                      onAdd={addToPlaylist}
                                     />
                                   ))}
                                 </Box>

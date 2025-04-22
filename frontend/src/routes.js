@@ -46,6 +46,8 @@ import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 import SearchPage from "layouts/search";
 import Playlist from "layouts/playlist";
+import Login from "layouts/login";
+import SignupPage from "layouts/signup2";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -82,6 +84,22 @@ const routes = [
     icon: <Icon fontSize="small">playlist_play</Icon>,
     route: "/playlist",
     component: <Playlist />,
+  },
+  {
+    type: "collapse",
+    name: "Log In",
+    key: "login",
+    icon: <Icon fontSize="small">login</Icon>,
+    route: "/login",
+    component: <Login />,
+  },
+  {
+    type: "collapse",
+    name: "Sign Up",
+    key: "sign-up",
+    icon: <Icon fontSize="small">login</Icon>,
+    route: "/signup2",
+    component: <SignupPage />,
   },
   {
     type: "collapse",

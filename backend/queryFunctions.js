@@ -2,118 +2,6 @@ const mysql = require('mysql2/promise');
 
 const pool = require('./db');
 
-// Function to get playlists and their song IDs for a given user
-async function getUserPlaylistSongs(userId) {
-  const connection = await pool.getConnection();
-  try {
-    // Query all playlists for the user
-    const [playlists] = await connection.execute(
-      `SELECT PlaylistID, Title FROM USER_PLAYLIST WHERE UserID = ?`,
-      [userId]
-    );
-
-    const result = [];
-
-    for (const playlist of playlists) {
-      const [songs] = await connection.execute(
-        `SELECT SongID FROM PLAYLIST_SONGS WHERE PlaylistID = ?`,
-        [playlist.PlaylistID]
-      );
-
-      result.push({
-        playlistId: playlist.PlaylistID,
-        title: playlist.Title,
-        songIds: songs.map(row => row.SongID)
-      });
-    }
-
-    return result;
-  } catch (err) {
-    console.error('Database error:', err);
-    return [];
-  } finally {
-    connection.release();
-  }
-}
-
-// Add a song to a user's playlist
-async function addSongToPlaylist(playlistId, songId) {
-  const connection = await pool.getConnection();
-  try {
-    await connection.execute(
-      `INSERT INTO PLAYLIST_SONGS (PlaylistID, SongID) VALUES (?, ?)`,
-      [playlistId, songId]
-    );
-    console.log(`Song ${songId} added to playlist ${playlistId}`);
-  } catch (err) {
-    if (err.code === 'ER_DUP_ENTRY') {
-      console.log('This song is already in the playlist.');
-    } else {
-      console.error('Error adding song:', err);
-    }
-  } finally {
-    connection.release();
-  }
-}
-  
-// Remove a song from a user's playlist
-async function removeSongFromPlaylist(playlistId, songId) {
-  const connection = await pool.getConnection();
-  try {
-    const [result] = await connection.execute(
-      `DELETE FROM PLAYLIST_SONGS WHERE PlaylistID = ? AND SongID = ?`,
-      [playlistId, songId]
-    );
-
-    if (result.affectedRows === 0) {
-      console.log('Song not found in playlist.');
-    } else {
-      console.log(`Song ${songId} removed from playlist ${playlistId}`);
-    }
-  } catch (err) {
-    console.error('Error removing song:', err);
-  } finally {
-    connection.release();
-  }
-}
-
-// Function that returns all of the song ids in a certain genre.
-async function getSongsByGenre(genre) {
-  const connection = await pool.getConnection();
-  try {
-    const [rows] = await connection.execute(
-      `SELECT SongID FROM SONG WHERE Genre = ?`,
-      [genre]
-    );
-    return rows.map(row => row.SongID);
-  } catch (err) {
-    console.error('Error retrieving songs by genre:', err);
-    return [];
-  } finally {
-    connection.release();
-  }
-}
-
-// Function to return all of the song ids of songs made by a certain artist.
-async function getSongsByArtistName(artistName) {
-  const connection = await pool.getConnection();
-  try {
-    const [rows] = await connection.execute(
-      `SELECT SONG.SongID, SONG.Name AS SongName
-       FROM SONG
-       JOIN ARTIST ON SONG.ArtistID = ARTIST.ArtistID
-       WHERE ARTIST.Name = ?`,
-      [artistName]
-    );
-    return rows.map(row => row.SongID);
-  } catch (err) {
-    console.error('Error retrieving songs by artist name:', err);
-    return [];
-  } finally {
-    connection.release();
-  }
-}
-
 // Fetch albums along with artist names and their songs including ytlink
 async function getAlbumsWithSongs(limit = 100, offset = 0) {
   const sqlAlbums = `
@@ -263,4 +151,119 @@ async function searchAlbums(searchTerm, limit = 100, offset = 0) {
     connection.release();
   }
 }
-module.exports = { getAlbumsWithSongs, searchAlbums };
+
+//  Create a new user (and a default playlist for them)
+async function createUser(username, email, passwordHash) {
+  const connection = await pool.getConnection();
+  try {
+    // 1) insert into USER
+    const [res] = await connection.execute(
+      `INSERT INTO USER (Username, Email, Password)
+       VALUES (?, ?, ?)`,
+      [username, email, passwordHash]
+    );
+
+    // 2) build the playlist title with a template literal
+    const playlistTitle = `${username}'s Playlist`;
+
+    // 3) insert into USER_PLAYLIST for that new user
+    await connection.execute(
+      `INSERT INTO USER_PLAYLIST (UserID, Title)
+       VALUES (?, ?)`,
+      [res.insertId, playlistTitle]
+    );
+
+    return res.insertId;
+  } catch (err) {
+    console.error('Error creating user + playlist:', err);
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+/**
+ * Look up a user by username.  Used for logging in.
+ * @returns {User|null}
+ */
+async function getUserByUsername(username) {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.execute(
+      `SELECT UserID, Username, Email, Password
+       FROM USER
+       WHERE Username = ?`,
+      [username]
+    );
+    return rows[0] || null;
+  } catch (err) {
+    console.error('Error fetching user:', err);
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+async function getUserPlaylistSongs(userId) {
+  const connection = await pool.getConnection();
+  try {
+    const [playlists] = await connection.execute(
+      `SELECT PlaylistID, Title FROM USER_PLAYLIST WHERE UserID = ?`,
+      [userId]
+    );
+    const result = [];
+    for (const p of playlists) {
+      const [songs] = await connection.execute(
+        `SELECT SongID FROM PLAYLIST_SONGS WHERE PlaylistID = ?`,
+        [p.PlaylistID]
+      );
+      result.push({
+        playlistId: p.PlaylistID,
+        title: p.Title,
+        songIds: songs.map(r => r.SongID),
+      });
+    }
+    return result;
+  } finally {
+    connection.release();
+  }
+}
+
+async function addSongToPlaylist(playlistId, songId) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.execute(
+      `INSERT INTO PLAYLIST_SONGS (PlaylistID, SongID)
+       VALUES (?, ?)`,
+      [playlistId, songId]
+    );
+  } catch (err) {
+    if (err.code !== 'ER_DUP_ENTRY') throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+async function removeSongFromPlaylist(playlistId, songId) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.execute(
+      `DELETE FROM PLAYLIST_SONGS
+       WHERE PlaylistID = ? AND SongID = ?`,
+      [playlistId, songId]
+    );
+  } finally {
+    connection.release();
+  }
+}
+
+
+module.exports = {
+  getAlbumsWithSongs,
+  searchAlbums,
+  createUser,
+  getUserByUsername,
+  getUserPlaylistSongs,
+  addSongToPlaylist,
+  removeSongFromPlaylist 
+};
