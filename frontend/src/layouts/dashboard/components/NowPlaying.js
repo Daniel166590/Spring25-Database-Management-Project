@@ -4,7 +4,7 @@ import { Box, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ReactPlayer from "react-player";
 
-export default function NowPlaying({ song, onStop, width = 600 }) {
+export default function NowPlaying({ song, onStop }) {
   if (!song) return null;
 
   // Convert YouTube watch link → embed + autoplay
@@ -15,22 +15,24 @@ export default function NowPlaying({ song, onStop, width = 600 }) {
       sx={{
         position: "fixed",
         bottom: 16,
-        left: `calc(50% - ${width / 5}px)`,
-        width: `${width/1.5}px`,
-        height: 100,               // fixed slim height
+        left: "50%",
+        transform: "translateX(-50%)", // centers horizontally
+        width: "50%", // takes 50% of the width
+        maxWidth: 8000, // optional max-width for large screens
+        minWidth: 650, // optional min-width for small screens
+        height: 70,
         bgcolor: "background.paper",
-        opacity: 100,
         boxShadow: 3,
-        borderRadius: 1,
-        px: 5,                    // horizontal padding only
+        borderRadius: 3, // rounded corners
+        px: 3,
         display: "flex",
-        alignItems: "center",     // vertically center contents
+        alignItems: "center",
         justifyContent: "space-between",
         zIndex: 1300,
       }}
     >
       {/* Song info + close */}
-      <Box display="flex" alignItems="center" flex="1" mr={2}>
+      <Box display="flex" alignItems="center" flex={1} overflow="hidden" mr={2}>
         <Typography noWrap sx={{ fontWeight: "bold", mr: 2 }}>
           {song.Name}
         </Typography>
@@ -46,9 +48,10 @@ export default function NowPlaying({ song, onStop, width = 600 }) {
       <Box
         sx={{
           position: "relative",
-          width: 240,    // small player width
-          height: 100,    // small player height
+          width: 480,
+          height: 200,
           flexShrink: 0,
+          bottom: 15,
         }}
       >
         <ReactPlayer
@@ -58,7 +61,7 @@ export default function NowPlaying({ song, onStop, width = 600 }) {
           volume={0.5}
           width="100%"
           height="100%"
-          style={{ position: "absolute", top: 0, left: 0 }}
+          style={{ position: "absolute", top: -48, left: 0 }}
           config={{ youtube: { playerVars: { modestbranding: 1, rel: 0 } } }}
         />
       </Box>
