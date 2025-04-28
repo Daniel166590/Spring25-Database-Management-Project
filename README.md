@@ -130,7 +130,7 @@ Mooflixz is a lightweight music streaming application that allows users to brows
      ```  
 3. **Create tables**  
    - In the same SQL tab, copy and paste the entire contents of `backend/database/CreateDB.sql` and execute it to create all required tables.  
-4. **Populate initial data (one-time)** **Populate initial data (one-time)**  
+4. **Populate initial data (one-time)**  
    - The `/backend/api` folder contains separate scripts solely for loading the database at setup:
      - Update your DB credentials in `backend/api/Javatest.js`.
      - Run the loader script once:
