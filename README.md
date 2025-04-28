@@ -1,6 +1,6 @@
 # Mooflixz
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 
 A full-stack music streaming web app built with React, Node.js/Express, and MySQL.
 
@@ -31,21 +31,21 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
 ## Features
 
-- Browse and filter albums  
-- Full-text search for tracks and artists  
-- User authentication and sessions  
-- Stream audio and display album art  
+- Browse and filter albums
+- Full-text search for tracks and artists
+- User authentication and sessions
+- Stream audio and display album art
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** React, React Router, Material-UI (or your UI library of choice)  
-- **Backend:** Node.js, Express.js  
-- **Database:** MySQL (managed via MySQL Workbench and SQL scripts)  
-- **ORM / Querying:** Custom query functions in `queryFunctions.js`  
-- **Authentication:** Passport.js with Azure OAuth and session management  
-- **Deployment:** Docker / CI definitions (optional)  
+- **Frontend:** React, React Router, Material-UI (or your UI library of choice)
+- **Backend:** Node.js, Express.js
+- **Database:** MySQL (managed via MySQL Workbench and SQL scripts)
+- **ORM / Querying:** Custom query functions in `queryFunctions.js`
+- **Authentication:** Passport.js with Azure OAuth and session management
+- **Deployment:** Docker / CI definitions (optional)
 
 ---
 
@@ -55,14 +55,14 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 .
 ├── LICENSE
 ├── README.md           ← this file
-├── backend             ← Express API + MySQL setup
-│   ├── api             ← database loading script
-│   │   ├── Javatest.js  ← adjust DB config here
-│   │   └── test.js      ← run to populate tables
+├── backend             ← Main server code
+│   ├── api             ← Separate initialization scripts (one-time DB load only)
+│   │   ├── Javatest.js  ← DB config for loader
+│   │   └── test.js      ← Run once to populate tables
 │   ├── auth.js
-│   ├── database        ← raw SQL scripts
+│   ├── database        ← SQL schema scripts
 │   │   ├── CreateDB.sql ← create schema & tables
-│   │   ├── ClearDB.sql  ← (optional cleanup)
+│   │   ├── ClearDB.sql  ← optional cleanup
 │   │   ├── LoadDB.sql   ← empty; data loaded via test.js
 │   │   ├── Query_m.sql
 │   │   └── tempData.sql
@@ -75,8 +75,8 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 │   ├── routes
 │   │   ├── albums.js
 │   │   └── search.js
-│   ├── routes.js       ← central routing
-│   └── server.js       ← entry point
+│   ├── routes.js       ← central routing for live API
+│   └── server.js       ← entry point for live API
 ├── frontend            ← React client app
 │   ├── CHANGELOG.md
 │   ├── ISSUE_TEMPLATE.md
@@ -105,50 +105,53 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v14+  
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)  
-- [MySQL Server](https://dev.mysql.com/downloads/mysql/)  
-- [MySQL Workbench](https://www.mysql.com/products/workbench/)  
+- [Node.js](https://nodejs.org/) v14+
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [MySQL Server](https://dev.mysql.com/downloads/mysql/)
+- [MySQL Workbench](https://www.mysql.com/products/workbench/)
+- Visual Studio Code (Recommended)
+- Two Terminal Windows (Recommended)
 
 ---
 
 ### Backend Setup
 
-1. **Install dependencies**  
+1. **Install dependencies**
    ```bash
    cd backend
    npm install
    ```
-2. **Create the MySQL database schema**  
-   - In MySQL Workbench, connect to your local server and create a schema, e.g., `mooflixz_db`.  
-3. **Create tables**  
-   - Execute the `database/CreateDB.sql` script in MySQL Workbench:  
+2. **Create MySQL schema**
+   - In MySQL Workbench, connect to your local server and create a schema (e.g., `mooflixz_db`).
+3. **Create tables**
+   - Execute the `database/CreateDB.sql` script in MySQL Workbench:
      ```sql
      SOURCE database/CreateDB.sql;
      ```
-4. **Populate initial data**  
-   - Adjust the database connection settings inside `backend/api/Javatest.js` to match your schema credentials.  
-   - Run the loader script:  
-     ```bash
-     node backend/api/test.js
-     ```
-   This will insert sample data into your tables.  
-5. **Start the server**  
+4. **Populate initial data (one-time)**
+   - The `/backend/api` folder contains separate scripts solely for loading the database at setup:
+     - Update your DB credentials in `backend/api/Javatest.js`.
+     - Run the loader script once:
+       ```bash
+       node backend/api/test.js
+       ```
+   This will insert api music data into your tables.
+5. **Start the backend server**
    ```bash
    npm start
    ```
-   The API will be available at `http://localhost:3001` by default.
+   The backend server will run at `http://localhost:3005` by default.
 
 ---
 
 ### Frontend Setup
 
-1. **Install dependencies**  
+1. **Install dependencies**
    ```bash
    cd frontend
    npm install
    ```
-2. **Run the client**  
+2. **Run the client**
    ```bash
    npm start
    ```
@@ -158,34 +161,34 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
 ## Usage
 
-- Register or log in to access player controls  
-- Browse albums on the “Albums” page  
-- Search by artist or track via the search bar  
-- Click a track to play it in the embedded player  
+- Register or log in to access player controls
+- Browse albums on the “Albums” page
+- Search by artist or track via the search bar
+- Click a track to play it in the embedded player
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint            | Description                             |
-| ------ | --------------------| --------------------------------------- |
-| `GET`  | `/api/albums`       | List all albums                         |
-| `GET`  | `/api/albums/:id`   | Get album details + tracks              |
-| `GET`  | `/api/search?q=...` | Full-text search for artists & tracks   |
-| `POST` | `/api/auth/login`   | Authenticate user, return session cookie|
-| `POST` | `/api/auth/register`| Create new user account                 |
+| Method | Endpoint             | Description                              |
+| ------ | -------------------- | ---------------------------------------- |
+| `GET`  | `/api/albums`        | List all albums                          |
+| `GET`  | `/api/albums/:id`    | Get album details + tracks               |
+| `GET`  | `/api/search?q=...`  | Full-text search for artists & tracks    |
+| `POST` | `/api/auth/login`    | Authenticate user, return session cookie |
+| `POST` | `/api/auth/register` | Create new user account                  |
 
-*(See `backend/routes/` for full details.)*
+*(See ********`backend/routes/`******** for full details.)*
 
 ---
 
 ## Contributing
 
-1. Fork the repo  
-2. Create a feature branch (`git checkout -b feat/YourFeature`)  
-3. Commit your changes (`git commit -m 'Add new feature'`)  
-4. Push to your branch (`git push origin feat/YourFeature`)  
-5. Open a Pull Request  
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feat/YourFeature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to your branch (`git push origin feat/YourFeature`)
+5. Open a Pull Request
 
 ---
 
