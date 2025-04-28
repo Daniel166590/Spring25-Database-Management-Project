@@ -114,66 +114,85 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
 ---
 
-### Backend Setup
+### Database Setup
 
-1. **Install dependencies**  
-   ```bash
-   cd backend
-   npm install
-   ```
+**Workbench location:** New SQL tab in MySQL Workbench
 
-2. **Create database and schema**  
-   In MySQL Workbench, open a new SQL tab and run:
+1. **Create database and schema**
+
    ```sql
    CREATE DATABASE IF NOT EXISTS mooflixz_db;
    USE mooflixz_db;
    ```
 
-3. **Create tables**  
-   In the same SQL tab, paste the contents of `backend/database/CreateDB.sql` and execute it.
+2. **Create tables**
 
-4. **Populate initial data (one-time)**  
-   The `/backend/api` folder contains scripts for loading the database at setup.  
-   - Update your DB credentials in `backend/api/Javatest.js`:
-     ```js
-     const connection = mysql.createConnection({
-       host: 'localhost',        // Update this with your database host
-       user: 'root',             // Your MySQL username
-       password: '2C33qs9v',     // Your MySQL password
-       database: 'mooflixz_db',  // Your database name
-       port: 3306                // Your MySQL port
-     });
-     ```
-   - Run the loader script:
-     ```bash
-     node backend/api/test.js
-     ```
-   > **Note:** If the script appears to hang, it's likely rate-limited by API tokens. Press `Ctrl+C` to exit.
+   - Paste the contents of `backend/database/CreateDB.sql` into the same SQL tab and execute to build all tables.
 
-5. **Configure live API database connection**  
-   Update the pool settings in `backend/db.js`:
+3. **Populate initial data (one-time)**\
+   **Terminal location:** `backend/api/`
+
+   **Example config in ************************`backend/api/Javatest.js`************************:**
+
    ```js
-   const pool = mysql.createPool({
-     host: '127.0.0.1',
-     port: 3306,
-     user: 'root',            // Your MySQL username
-     password: '',            // Adjust if your MySQL password isn't empty
-     database: 'mooflixz_db', // Your database name
-     waitForConnections: true,
-     connectionLimit: 10,
-     queueLimit: 0
+   const connection = mysql.createConnection({
+     host: 'localhost',        // Update this with your database host
+     user: 'root',             // Your MySQL username
+     password: '2C33qs9v',     // Your MySQL password
+     database: 'mooflixz_db',  // Your database name
+     port: 3306                // Your MySQL port
    });
    ```
 
-6. **Start the backend server**  
+   ```bash
+   cd backend/api
+   node test.js
+   ```
+
+   > **Note:** If the script hangs, press `Ctrl+C` to exit due to API rate limits.
+
+---
+
+### Backend Setup
+
+**Terminal location:** `backend/`
+
+1. **Install dependencies**
+
+   ```bash
+   cd backend
+   npm install
+   ```
+
+2. **Configure live API database connection**
+
+   - Open `backend/db.js` and update the pool settings:
+     ```js
+     const pool = mysql.createPool({
+       host: '127.0.0.1',
+       port: 3306,
+       user: 'root',            // Your MySQL username
+       password: '',            // Your MySQL password
+       database: 'mooflixz_db', // Your database name
+       waitForConnections: true,
+       connectionLimit: 10,
+       queueLimit: 0
+     });
+     ```
+
+3. **Start the backend server**
+
    ```bash
    npm start
-   ```  
+   ```
+
    The live API runs at `http://localhost:3005` by default.
 
 ---
 
 ### Frontend Setup
+
+**Terminal location:** `frontend/`
 
 1. **Install dependencies**
    ```bash
@@ -186,9 +205,11 @@ Mooflixz is a lightweight music streaming application that allows users to brows
    ```
    Opens at `http://localhost:3000`. No additional configuration needed.
 
----
+**Terminal location:** `frontend/`
 
-## Usage
+
+
+Usage
 
 - Register or log in to access player controls
 - Browse albums on the “Albums” page
@@ -207,7 +228,7 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 | `POST` | `/api/auth/login`    | Authenticate user, return session cookie |
 | `POST` | `/api/auth/register` | Create new user account                  |
 
-*(See ********`backend/routes/`******** for full details.)*
+*(See ********************`backend/routes/`******************** for full details.)*
 
 ---
 
