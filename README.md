@@ -133,16 +133,7 @@ Mooflixz is a lightweight music streaming application that allows users to brows
      node backend/api/test.js
      ```
    This will insert sample data into your tables.  
-5. **Environment variables**  
-   - Create a `.env` file at the root of `/backend` with only the following authentication values (no need to secure for a student project):  
-     ```env
-     AZURE_TENANT_ID=9cd14d1e-18c0-4d92-9795-050c68512445
-     AZURE_CLIENT_ID=d286c814-fcfd-4094-b5cb-401212932a54
-     AZURE_CLIENT_SECRET=bbe21f54-e809-4774-8bf2-0be01c1fb2b3
-     AZURE_REDIRECT_URI=http://localhost:3005/dashboard
-     SESSION_SECRET=99d79b30-8e7b-4cf9-90be-108c695cffcf
-     ```
-6. **Start the server**  
+5. **Start the server**  
    ```bash
    npm start
    ```
