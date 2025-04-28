@@ -133,6 +133,15 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 4. **Populate initial data (one-time)**  
    - The `/backend/api` folder contains separate scripts solely for loading the database at setup:
      - Update your DB credentials in `backend/api/Javatest.js`.
+          ```js
+           const connection = mysql.createConnection({
+             host: 'localhost', // Update this with your database host
+             user: 'root',      // Your MySQL username
+             password: '', // Your MySQL password
+             database: 'mooflixz_db', // Your database name
+             port: 3306         // Your MySQL port, default is usually 3306
+           });
+           ```
      - Run the loader script once:
        ```bash
        node backend/api/test.js
@@ -141,13 +150,16 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
    **Example configuration in `backend/api/Javatest.js`:**
    ```js
-   const connection = mysql.createConnection({
-     host: 'localhost', // Update this with your database host
-     user: 'root',      // Your MySQL username
-     password: '', // Your MySQL password
-     database: 'mooflixz_db', // Your database name
-     port: 3306         // Your MySQL port, default is usually 3306
-   });
+    const pool = mysql.createPool({
+      host: '127.0.0.1',
+      port: 3307,
+      user: 'root',
+      password: '', // Adjust if your MySQL password isn't empty
+      database: 'Spring25_Database_Management_Project',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
    ```
 
    $1> **Important:** Before starting the backend server, update the pool configuration in `backend/db.js` with your MySQL host, port, user, password, and database name to match your environment.
