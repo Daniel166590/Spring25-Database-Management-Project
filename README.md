@@ -138,6 +138,7 @@ Mooflixz is a lightweight music streaming application that allows users to brows
    ```
 
    **Example config in ************************`backend/api/Javatest.js`************************:**
+   **This must be configured to your database or the script will not run**
 
    ```js
    const connection = mysql.createConnection({
