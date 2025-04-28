@@ -144,8 +144,8 @@ Mooflixz is a lightweight music streaming application that allows users to brows
    const connection = mysql.createConnection({
      host: 'localhost', // Update this with your database host
      user: 'root',      // Your MySQL username
-     password: '2C33qs9v', // Your MySQL password
-     database: 'Spring25_Database_Management_Project', // Your database name
+     password: '', // Your MySQL password
+     database: 'mooflixz_db', // Your database name
      port: 3306         // Your MySQL port, default is usually 3306
    });
    ```
