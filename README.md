@@ -25,7 +25,7 @@ A full-stack music streaming web app built with React, Node.js/Express, and MySQ
 
 ## About
 
-Mooflixz is a lightweight music streaming application that allows users to browse albums, search tracks, and play media directly in the browser. It combines a React-powered SPA frontend with a Node.js/Express backend serving a MySQL database of artists, albums, and tracks.
+Mooflixz is a lightweight music streaming application that allows users to browse albums, search tracks, and play media directly in the browser. It combines a React-powered frontend with a Node.js/Express backend serving a MySQL database of artists, albums, and tracks.
 
 ---
 
