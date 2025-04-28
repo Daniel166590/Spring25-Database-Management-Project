@@ -148,26 +148,25 @@ Mooflixz is a lightweight music streaming application that allows users to brows
        ```
          - When the terminal appears to be stuck, that means we've run out of tokens and will have to ^C to exit the script
 
-   **Example configuration in `backend/api/Javatest.js`:**
-   ```js
-    const pool = mysql.createPool({
-      host: '127.0.0.1',
-      port: 3306,
-      user: 'root',
-      password: '', // Adjust if your MySQL password isn't empty
-      database: 'mooflixz_db',
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0
-    });
-   ```
+   **Important:** Before starting the backend server, update the pool configuration in `backend/db.js` with your MySQL host, port, user, password, and database name to match your environment.
 
-   $1> **Important:** Before starting the backend server, update the pool configuration in `backend/db.js` with your MySQL host, port, user, password, and database name to match your environment.
-
-$2  
-   ```bash
-   npm start
-   ```
+5. **Update your database config for the backend and start**
+      **Example configuration in `backend/api/Javatest.js`:**
+       ```js
+        const pool = mysql.createPool({
+          host: '127.0.0.1',
+          port: 3306,
+          user: 'root',
+          password: '', // Adjust if your MySQL password isn't empty
+          database: 'mooflixz_db',
+          waitForConnections: true,
+          connectionLimit: 10,
+          queueLimit: 0
+        });
+       ``` 
+       ```bash
+       npm start
+       ```
    The backend server will run at `http://localhost:3005` by default.
 
 ---
