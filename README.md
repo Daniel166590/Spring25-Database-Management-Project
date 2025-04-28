@@ -209,7 +209,7 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
 **Terminal location:** `frontend/`
 
-
+---
 
 Usage
 
