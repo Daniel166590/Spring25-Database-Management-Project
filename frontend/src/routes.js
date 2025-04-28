@@ -75,14 +75,14 @@ const routes = [
     route: "/search",             // URL route for search page
     component: <SearchPage />,     // Your new Search page component
   },
-  {
+  /*{
     type: "collapse",
     name: "Playlist",
     key: "playlist",
     icon: <Icon fontSize="small">playlist_play</Icon>,
     route: "/playlist",
     component: <Playlist />,
-  },
+  },*/
   {
     type: "collapse",
     name: "Sign In",
