@@ -1,206 +1,131 @@
-# Mooflixz
+# Music Database System
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+## Overview
 
-A full-stack music streaming web app built with React, Node.js/Express, and MySQL.
-
----
-
-## Table of Contents
-
-- [About](#about)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Repository Structure](#repository-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## About
-
-Mooflixz is a lightweight music streaming application that allows users to browse albums, search tracks, and play media directly in the browser. It combines a React-powered SPA frontend with a Node.js/Express backend serving a MySQL database of artists, albums, and tracks.
-
----
+Welcome to the **Music Database System**! This project is a web-based platform designed to manage music-related data, including users, artists, playlists, albums, and songs. The system is designed to support two types of users — **Normal Users** and **Artist Users** — each with different levels of database access and functionality.
 
 ## Features
 
-- Browse and filter albums  
-- Full-text search for tracks and artists  
-- User authentication and sessions  
-- Stream audio and display album art  
+### Current Features
 
----
+- Database schema design with MySQL.
+- Basic frontend layout (HTML/CSS/JavaScript).
+- Support for two user types:
+  - **Normal Users**: Can create playlists, like songs, and browse music.
+  - **Artist Users**: Can manage their own artist profile, albums, and songs.
+- Timestamp-based tracking for record creation.
 
-## Tech Stack
+### Upcoming Features
 
-- **Frontend:** React, React Router, Material-UI (or your UI library of choice)  
-- **Backend:** Node.js, Express.js  
-- **Database:** MySQL (managed via MySQL Workbench and SQL scripts)  
-- **ORM / Querying:** Custom query functions in `queryFunctions.js`  
-- **Authentication:** Passport.js with Azure OAuth and session management  
-- **Deployment:** Docker / CI definitions (optional)  
+- User registration and authentication system.
+- Role-based access control.
+- Playlist management (add, edit, delete playlists).
+- Song search and filtering.
+- Artist biography management.
 
----
+### File Structure Overview
+   ```bash
+Spring25-Database-Management-Project/
+│── backend/                 # Django backend
+│   ├── manage.py            # Django project management script
+│   ├── requirements.txt     # Dependencies
+│   ├── db.sqlite3           # Default database (or PostgreSQL/MySQL in production)
+│   ├── backend/             # Main Django app
+│   │   ├── __init__.py
+│   │   ├── settings.py      # Django settings (configure for React & CORS)
+│   │   ├── urls.py          # API endpoints
+│   │   ├── views.py         # API logic
+│   │   ├── models.py        # Database models
+│   │   ├── serializers.py   # Convert DB models to JSON
+│   │   ├── admin.py         # Admin panel setup
+│   │   ├── tests.py         # Unit tests
+│   │   └── migrations/      # Database migrations
+│   ├── api/                 # Django Rest Framework (DRF) API
+│   │   ├── __init__.py
+│   │   ├── urls.py
+│   │   ├── views.py
+│   │   ├── serializers.py
+│   │   ├── permissions.py
+│   │   ├── authentication.py
+│   │   └── tests.py
+│   ├── static/              # Static files (if needed)
+│   ├── templates/           # Templates (if using Django for pages)
+│   └── media/               # Uploaded media files
+│
+│── frontend/                # React frontend
+│   ├── public/              # Public assets
+│   ├── src/                 # Source files
+│   │   ├── components/      # Reusable components
+│   │   ├── pages/           # Page views
+│   │   ├── services/        # API calls to Django backend
+│   │   ├── App.js           # Main React app component
+│   │   ├── index.js         # React root
+│   │   ├── styles/          # Styling (CSS, SCSS, Tailwind)
+│   ├── package.json         # Frontend dependencies
+│   ├── .env                 # Environment variables (API URLs, etc.)
+│   ├── vite.config.js       # (If using Vite instead of CRA)
+│   ├── webpack.config.js    # (If using Webpack)
+│   ├── tailwind.config.js   # (If using Tailwind CSS)
+│   └── node_modules/        # Dependencies
+│
+│── .gitignore               # Ignore unnecessary files
+│── README.md                # Documentation
+│── docker-compose.yml       # Optional: Containerized setup
+│── .env                     # Environment variables for backend/frontend
+│── scripts/                 # Deployment/management scripts
+└── docs/                    # Documentation
+   ```
 
-## Repository Structure
+## Database Schema
 
-```
-.
-├── LICENSE
-├── README.md           ← this file
-├── backend             ← Express API + MySQL setup
-│   ├── api             ← database loading script
-│   │   ├── Javatest.js  ← adjust DB config here
-│   │   └── test.js      ← run to populate tables
-│   ├── auth.js
-│   ├── database        ← raw SQL scripts
-│   │   ├── CreateDB.sql ← create schema & tables
-│   │   ├── ClearDB.sql  ← (optional cleanup)
-│   │   ├── LoadDB.sql   ← empty; data loaded via test.js
-│   │   ├── Query_m.sql
-│   │   └── tempData.sql
-│   ├── db.js           ← MySQL connection setup
-│   ├── media           ← uploaded or seed media files
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── queryFunctions.js
-│   ├── requirements.txt
-│   ├── routes
-│   │   ├── albums.js
-│   │   └── search.js
-│   ├── routes.js       ← central routing
-│   └── server.js       ← entry point
-├── frontend            ← React client app
-│   ├── CHANGELOG.md
-│   ├── ISSUE_TEMPLATE.md
-│   ├── LICENSE.md
-│   ├── jsconfig.json
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── public          ← static HTML/CSS/JS
-│   └── src             ← React source code
-│       ├── App.js
-│       ├── index.js
-│       ├── components
-│       ├── context
-│       ├── layouts
-│       └── routes.js
-└── legacy              ← old HTML/CSS prototypes
-    ├── about.html
-    ├── webPage.html
-    ├── style.css
-    └── *.jpg
-```
+The system uses a MySQL relational database with the following tables:
 
----
+### User Tables
 
-## Getting Started
+- `USER`: Stores user information (username, email, password, user type, date joined).
+- `USER_PLAYLIST`: Links users to their playlists.
+- `LIKED`: Tracks songs liked by users.
+
+### Artist Tables
+
+- `ARTIST`: Stores artist information (name, genre, biography, date joined).
+- `ARTIST_ALBUM`: Stores albums created by artists.
+
+### Music Tables
+
+- `SONG`: Stores information about songs, including references to albums and artists.
+
+### Relationships
+
+- One-to-Many: `ARTIST` to `ARTIST_ALBUM`
+- One-to-Many: `ARTIST_ALBUM` to `SONG`
+- Many-to-Many: `USER` to `SONG` (via `LIKED`)
+
+## Installation
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v14+  
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)  
-- [MySQL Server](https://dev.mysql.com/downloads/mysql/)  
-- [MySQL Workbench](https://www.mysql.com/products/workbench/)  
+- MySQL
+- Node.js (for future backend functionality)
+- Git
 
----
+### Steps
 
-### Backend Setup
-
-1. **Install dependencies**  
+1. Clone the repository:
    ```bash
-   cd backend
-   npm install
+   git clone https://github.com/yourusername/music-database-system.git
    ```
-2. **Create the MySQL database schema**  
-   - In MySQL Workbench, connect to your local server and create a schema, e.g., `mooflixz_db`.  
-3. **Create tables**  
-   - Execute the `database/CreateDB.sql` script in MySQL Workbench:  
-     ```sql
-     SOURCE database/CreateDB.sql;
-     ```
-4. **Populate initial data**  
-   - Adjust the database connection settings inside `backend/api/Javatest.js` to match your schema credentials.  
-   - Run the loader script:  
-     ```bash
-     node backend/api/test.js
-     ```
-   This will insert sample data into your tables.  
-5. **Environment variables**  
-   - Create a `.env` file at the root of `/backend` with only the following authentication values (no need to secure for a student project):  
-     ```env
-     AZURE_TENANT_ID=9cd14d1e-18c0-4d92-9795-050c68512445
-     AZURE_CLIENT_ID=d286c814-fcfd-4094-b5cb-401212932a54
-     AZURE_CLIENT_SECRET=bbe21f54-e809-4774-8bf2-0be01c1fb2b3
-     AZURE_REDIRECT_URI=http://localhost:3005/dashboard
-     SESSION_SECRET=99d79b30-8e7b-4cf9-90be-108c695cffcf
-     ```
-6. **Start the server**  
-   ```bash
-   npm start
-   ```
-   The API will be available at `http://localhost:3001` by default.
-
----
-
-### Frontend Setup
-
-1. **Install dependencies**  
-   ```bash
-   cd frontend
-   npm install
-   ```
-2. **Run the client**  
-   ```bash
-   npm start
-   ```
-   Opens at `http://localhost:3000`. No additional configuration needed.
-
----
+2. Set up the MySQL database with the provided schema.
+3. Install dependencies (coming soon).
+4. Run the frontend application (coming soon).
 
 ## Usage
 
-- Register or log in to access player controls  
-- Browse albums on the “Albums” page  
-- Search by artist or track via the search bar  
-- Click a track to play it in the embedded player  
-
----
-
-## API Endpoints
-
-| Method | Endpoint            | Description                             |
-| ------ | --------------------| --------------------------------------- |
-| `GET`  | `/api/albums`       | List all albums                         |
-| `GET`  | `/api/albums/:id`   | Get album details + tracks              |
-| `GET`  | `/api/search?q=...` | Full-text search for artists & tracks   |
-| `POST` | `/api/auth/login`   | Authenticate user, return session cookie|
-| `POST` | `/api/auth/register`| Create new user account                 |
-
-*(See `backend/routes/` for full details.)*
-
----
-
-## Contributing
-
-1. Fork the repo  
-2. Create a feature branch (`git checkout -b feat/YourFeature`)  
-3. Commit your changes (`git commit -m 'Add new feature'`)  
-4. Push to your branch (`git push origin feat/YourFeature`)  
-5. Open a Pull Request  
-
-Please review [`frontend/ISSUE_TEMPLATE.md`](frontend/ISSUE_TEMPLATE.md) for reporting bugs and feature requests.
-
----
+1. Sign up as a **Normal User** or **Artist User**.
+2. Create playlists and like songs (Normal User).
+3. Add artist information and upload songs (Artist User).
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.
 
