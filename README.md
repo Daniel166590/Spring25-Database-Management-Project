@@ -14,6 +14,7 @@ A full-stack music streaming web app built with React, Node.js/Express, and MySQ
 - [Repository Structure](#repository-structure)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
+  - [Database Setup](#database-setup)
   - [Backend Setup](#backend-setup)
   - [Frontend Setup](#frontend-setup)
 - [Usage](#usage)
