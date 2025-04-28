@@ -211,7 +211,7 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
 ---
 
-Usage
+### Usage
 
 - Register or log in to access player controls
 - Browse albums on the “Albums” page
