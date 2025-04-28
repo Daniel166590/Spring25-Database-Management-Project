@@ -146,6 +146,7 @@ Mooflixz is a lightweight music streaming application that allows users to brows
        ```bash
        node backend/api/test.js
        ```
+         - When the terminal appears to be stuck, that means we've run out of tokens and will have to ^C to exit the script
    This will insert sample music data into your tables.
 
    **Example configuration in `backend/api/Javatest.js`:**
