@@ -7,10 +7,6 @@ __pycache__/
 **/migrations/
 db.sqlite3
 
-# Environment variables
-.env
-.env.*
-
 # Node modules
 frontend/node_modules/
 **/node_modules/
