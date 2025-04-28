@@ -1,5 +1,5 @@
 # Mooflixz
-
+![Mooflixz Logo](frontend/public/images/logo.png)
 
 
 A full-stack music streaming web app built with React, Node.js/Express, and MySQL.
