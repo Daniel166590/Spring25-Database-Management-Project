@@ -121,14 +121,16 @@ Mooflixz is a lightweight music streaming application that allows users to brows
    cd backend
    npm install
    ```
-2. **Create MySQL schema**  
-   - In MySQL Workbench, connect to your local server and create a schema (e.g., `mooflixz_db`).  
-3. **Create tables**  
-   - Execute the `database/CreateDB.sql` script in MySQL Workbench:  
+2. **Create MySQL database and schema**  
+   - In MySQL Workbench, open a new SQL tab.  
+   - Run the following to create and switch to the database (replace `mooflixz_db` with your preferred name if desired):  
      ```sql
-     SOURCE database/CreateDB.sql;
-     ```
-4. **Populate initial data (one-time)**  
+     CREATE DATABASE IF NOT EXISTS mooflixz_db;
+     USE mooflixz_db;
+     ```  
+3. **Create tables**  
+   - In the same SQL tab, copy and paste the entire contents of `backend/database/CreateDB.sql` and execute it to create all required tables.  
+4. **Populate initial data (one-time)** **Populate initial data (one-time)**  
    - The `/backend/api` folder contains separate scripts solely for loading the database at setup:
      - Update your DB credentials in `backend/api/Javatest.js`.
      - Run the loader script once:
@@ -148,20 +150,9 @@ Mooflixz is a lightweight music streaming application that allows users to brows
    });
    ```
 
-   **Example pool configuration in `backend/db.js`:**
-   ```js
-   const pool = mysql.createPool({
-     host: '127.0.0.1',
-     port: 3307,
-     user: 'root',
-     password: '',         // Adjust if your MySQL password isn't empty
-     database: 'Spring25_Database_Management_Project',
-     waitForConnections: true,
-     connectionLimit: 10,
-     queueLimit: 0
-   });
-   ```
-5. **Start the backend server**  
+   $1> **Important:** Before starting the backend server, update the pool configuration in `backend/db.js` with your MySQL host, port, user, password, and database name to match your environment.
+
+$2  
    ```bash
    npm start
    ```
