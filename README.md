@@ -116,27 +116,52 @@ Mooflixz is a lightweight music streaming application that allows users to brows
 
 ### Backend Setup
 
-1. **Install dependencies**
+1. **Install dependencies**  
    ```bash
    cd backend
    npm install
    ```
-2. **Create MySQL schema**
-   - In MySQL Workbench, connect to your local server and create a schema (e.g., `mooflixz_db`).
-3. **Create tables**
-   - Execute the `database/CreateDB.sql` script in MySQL Workbench:
+2. **Create MySQL schema**  
+   - In MySQL Workbench, connect to your local server and create a schema (e.g., `mooflixz_db`).  
+3. **Create tables**  
+   - Execute the `database/CreateDB.sql` script in MySQL Workbench:  
      ```sql
      SOURCE database/CreateDB.sql;
      ```
-4. **Populate initial data (one-time)**
+4. **Populate initial data (one-time)**  
    - The `/backend/api` folder contains separate scripts solely for loading the database at setup:
      - Update your DB credentials in `backend/api/Javatest.js`.
      - Run the loader script once:
        ```bash
        node backend/api/test.js
        ```
-   This will insert api music data into your tables.
-5. **Start the backend server**
+   This will insert sample music data into your tables.
+
+   **Example configuration in `backend/api/Javatest.js`:**
+   ```js
+   const connection = mysql.createConnection({
+     host: 'localhost', // Update this with your database host
+     user: 'root',      // Your MySQL username
+     password: '2C33qs9v', // Your MySQL password
+     database: 'Spring25_Database_Management_Project', // Your database name
+     port: 3306         // Your MySQL port, default is usually 3306
+   });
+   ```
+
+   **Example pool configuration in `backend/db.js`:**
+   ```js
+   const pool = mysql.createPool({
+     host: '127.0.0.1',
+     port: 3307,
+     user: 'root',
+     password: '',         // Adjust if your MySQL password isn't empty
+     database: 'Spring25_Database_Management_Project',
+     waitForConnections: true,
+     connectionLimit: 10,
+     queueLimit: 0
+   });
+   ```
+5. **Start the backend server**  
    ```bash
    npm start
    ```
