@@ -130,12 +130,6 @@ Mooflixz is a lightweight music streaming application that allows users to brows
    - Paste the contents of `backend/database/CreateDB.sql` into the same SQL tab and execute to build all tables.
 
 3. **Populate initial data (one-time)**\
-   **Terminal location:** `backend/api/`
-
-   ```bash
-   cd backend/api
-   node test.js
-   ```
 
    **Example config in ************************`backend/api/Javatest.js`************************:**
    > **This must be configured to your database**
@@ -148,6 +142,12 @@ Mooflixz is a lightweight music streaming application that allows users to brows
      database: 'mooflixz_db',  // Your database name
      port: 3306                // Your MySQL port
    });
+   ```
+   **Terminal location:** `backend/api/`
+
+   ```bash
+   cd backend/api
+   node test.js
    ```
 
    > **Note:** If the script hangs, press `Ctrl+C` to exit due to API rate limits.
